@@ -12,5 +12,29 @@ services:
     volumes:
       - db-data:/foo
 
+# Cache
+  cache:
+    image: your-cache-image
+    # Add configurations for cache service
+
+  # Processing + Like-batcher
+  processing:
+    image: your-processing-image
+    # Add configurations for processing service
+
+  # SQL database
+  database:
+    image: mysql:latest  # Example MySQL image
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: your_database_name
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Redis database
+  redis:
+    image: redis:latest
+    # Add configurations for Redis service
+
 volumes:
-  db-data:
+  db_data:
