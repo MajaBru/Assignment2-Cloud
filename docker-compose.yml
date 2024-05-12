@@ -1,35 +1,24 @@
-version: '3.8'
+version: '3'
+
 
 services:
-  web:
-  build: .
-  ports: 
-    - "8080:8080"
-  environment:
-    - MYSQL_PASSWORD=${root123}
-
+  # SQL database
   db:
-    image: "mysql"
+    image: mysql:latest
+    restart: always
+    ports:
+      - "32000:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: "${root123}"
-      MYSQL_DATABASE: "group4"
+      MYSQL_USER: "group4"
+      MYSQL_ROOT_PASSWORD: "root123"
+      MYSQL_DATABASE: "redditdb"
     volumes:
-      - db-data:/var/lib/mysql
+      - db_data:/var/lib/mysql
 
-# Cache
-  cache:
-    image: your-cache-image
-    # Add configurations for cache service
-
-  # Processing + Like-batcher
+  # processing layer/API Flask app
   processing:
-    image: your-processing-image
-    # Add configurations for processing service
-
-  # Redis database
-  redis:
-    image: redis:latest
-    # Add configurations for Redis service
-
-volumes:
-  db_data:
+    build: ./app
+    ports:
+      - "5000:5000"  # Adjust as needed if your Flask app listens on a different port
+    depends_on:
+      - db
