@@ -1,17 +1,20 @@
-FROM node:19 as builder 
+# Use an official Python runtime as a parent image
+FROM python:3
 
+# Set the working directory in the container
 WORKDIR /app
 
-COPY package*.json ./
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-RUN npm install
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Make port 5000 available to the world outside this container
+EXPOSE 5000
 
-ENV PORT=8080
 
-EXPOSE 8080
+ENV NAME World
 
-RUN echo "variable value is $port"
 
-CMD ["python", "start"]
+CMD ["python", "app.py"]
