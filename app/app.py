@@ -15,7 +15,7 @@ def dbconn():
     }
 
     connection = mysql.connector.connect(**config)
-    #cursor can be used to do operations on the database
+    # cursor can be used to do operations on the database
     cursor = connection.cursor(dictionary=True)
     cursor.execute("SELECT * FROM Users")
     results = cursor.fetchall()
@@ -27,6 +27,7 @@ def dbconn():
 @app.route('/')
 def index():
     return jsonify({'User Data': dbconn()})
+
 
 # If ran (not just imported from elsewhere), launch the server.
 if __name__ == "__main__":
