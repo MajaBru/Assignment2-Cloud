@@ -1,0 +1,33 @@
+from flask import Flask, jsonify, request, render_template
+import mysql.connector
+
+app = Flask(__name__)
+
+
+# setup mysql connection
+def dbconn():
+    config = {
+    'host':"mysql",
+    "port":"3306",
+    "user":"group4",
+    "password":"root123",
+    "database":"redditdb"
+    }
+
+    connection = mysql.connector.connect(**config)
+    #cursor can be used to do operations on the database
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Users")
+    results = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return results
+
+
+@app.route('/')
+def index():
+    return jsonify({'User Data': dbconn()})
+
+# If ran (not just imported from elsewhere), launch the server.
+if __name__ == "__main__":
+    app.run(host="0.0.0.0")

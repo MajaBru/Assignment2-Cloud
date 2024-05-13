@@ -1,7 +1,16 @@
 version: '3'
 
-
 services:
+  # processing layer/API Flask app
+  processing:
+    build: ./app
+    links:
+      - db
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+
   # SQL database
   db:
     image: mysql:latest
@@ -13,12 +22,7 @@ services:
       MYSQL_ROOT_PASSWORD: "root123"
       MYSQL_DATABASE: "redditdb"
     volumes:
-      - db_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data:/var/lib/mysql
 
-  # processing layer/API Flask app
-  processing:
-    build: ./app
-    ports:
-      - "5000:5000"  # Adjust as needed if your Flask app listens on a different port
-    depends_on:
-      - db
+
