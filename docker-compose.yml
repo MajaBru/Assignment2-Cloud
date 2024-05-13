@@ -3,6 +3,7 @@ version: '3'
 services:
   # processing layer/API Flask app
   processing:
+    image: flaskapp:latest
     build: ./app
     links:
       - db

@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, render_template
 import mysql.connector
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../front-end')
 
 
 # setup mysql connection
@@ -26,7 +26,7 @@ def dbconn():
 
 @app.route('/')
 def index():
-    return render_template('index.php')
+    return render_template('index.html')
     """ return jsonify(dbconn()) """
 
 
