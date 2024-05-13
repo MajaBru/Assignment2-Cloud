@@ -26,7 +26,8 @@ def dbconn():
 
 @app.route('/')
 def index():
-    return jsonify({'User Data': dbconn()})
+    return render_template('index.php')
+    """ return jsonify(dbconn()) """
 
 
 # If ran (not just imported from elsewhere), launch the server.
