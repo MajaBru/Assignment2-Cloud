@@ -14,13 +14,15 @@ services:
   # SQL database
   db:
     image: mysql:latest
+    restart: always
     ports:
-      - "3306:3306"
+      - "32000:3306"
     environment:
       MYSQL_USER: "group4"
       MYSQL_PASSWORD: "root123"
       MYSQL_DATABASE: "redditdb"
     volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./data:/var/lib/mysql
 
 
