@@ -7,11 +7,11 @@ app = Flask(__name__)
 # setup mysql connection
 def dbconn():
     config = {
-    'host':"129.114.27.249",
-    "port":"3306",
-    "user":"group4",
-    "password":"root123",
-    "database":"redditdb"
+        'host': "129.114.27.249",
+        'port': "3306",
+        'user': "group4",
+        'password': "root123",
+        'database': "redditdb"
     }
 
     connection = mysql.connector.connect(**config)
@@ -32,4 +32,4 @@ def index():
 
 # If ran (not just imported from elsewhere), launch the server.
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port:5000)
+    app.run(host="0.0.0.0", port=5000)
