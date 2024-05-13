@@ -7,7 +7,7 @@ app = Flask(__name__)
 # setup mysql connection
 def dbconn():
     config = {
-    'host':"mysql",
+    'host':"129.114.27.249",
     "port":"3306",
     "user":"group4",
     "password":"root123",
