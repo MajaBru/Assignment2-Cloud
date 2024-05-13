@@ -1,0 +1,24 @@
+version: '3'
+
+
+services:
+  # SQL database
+  db:
+    image: mysql:latest
+    restart: always
+    ports:
+      - "32000:3306"
+    environment:
+      MYSQL_USER: "group4"
+      MYSQL_ROOT_PASSWORD: "root123"
+      MYSQL_DATABASE: "redditdb"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # processing layer/API Flask app
+  processing:
+    build: ./app
+    ports:
+      - "5000:5000"  # Adjust as needed if your Flask app listens on a different port
+    depends_on:
+      - db
