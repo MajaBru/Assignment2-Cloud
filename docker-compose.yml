@@ -11,6 +11,8 @@ services:
       - "5002:5000"
     depends_on:
       - db
+    environment: #variable to set to developmnent
+      FLASK_ENV: development
 
   # SQL database
   db:
@@ -19,6 +21,7 @@ services:
     ports:
       - "32000:3306"
     environment:
+      MYSQL_ROOT_PASSWORD: "root123"
       MYSQL_USER: "group4"
       MYSQL_PASSWORD: "root123"
       MYSQL_DATABASE: "redditdb"

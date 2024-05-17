@@ -4,10 +4,11 @@ import mysql.connector
 app = Flask(__name__, template_folder='../front-end')
 
 
+# endra på host db
 # setup mysql connection
 def dbconn():
     config = {
-        'host': "129.114.27.249",
+        'host': "db",
         'port': "3306",
         'user': "group4",
         'password': "root123",
@@ -27,7 +28,14 @@ def dbconn():
 @app.route('/')
 def index():
     return render_template('index.html')
-    """ return jsonify(dbconn()) """
+    # """ return jsonify(dbconn()) """
+
+#this is new
+@app.route('/users', methods=['GET'])
+def get_users():
+    users = dbconn()
+    return jsonify(users)
+    # """ return jsonify(dbconn()) """
 
 
 # If ran (not just imported from elsewhere), launch the server.
