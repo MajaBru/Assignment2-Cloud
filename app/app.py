@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, render_template
 import mysql.connector
 
-app = Flask(__name__, template_folder='../front-end')
+app = Flask(__name__, template_folder='front-end')
 
 
 # endra på host db
