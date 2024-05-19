@@ -30,12 +30,13 @@ def index():
     return render_template('index.html')
     # """ return jsonify(dbconn()) """
 
-#this is new
-@app.route('/users', methods=['GET'])
-def get_users():
-    users = dbconn()
-    return jsonify(users)
-    # """ return jsonify(dbconn()) """
+
+# #this is new
+# @app.route('/users', methods=['GET'])
+# def get_users():
+#     users = dbconn()
+#     return jsonify(users)
+#     # """ return jsonify(dbconn()) """
 
 
 # If ran (not just imported from elsewhere), launch the server.
