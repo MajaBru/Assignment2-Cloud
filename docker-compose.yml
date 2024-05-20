@@ -50,34 +50,18 @@
 version: '3'
 
 services:
-  # processing layer/API FastAPI app
+  # FastAPI application
   processing:
-    build: ./app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
     image: fastapiapplication:latest
     environment:
       FASTAPI_ENV: development
     depends_on:
       - db
-    networks:
-      - app-network
-
-  processing_1:
-    build: ./app
-    image: fastapiapplication:latest
-    environment:
-      FASTAPI_ENV: development
-    depends_on:
-      - db
-    networks:
-      - app-network
-
-  processing_2:
-    build: ./app
-    image: fastapiapplication:latest
-    environment:
-      FASTAPI_ENV: development
-    depends_on:
-      - db
+    ports:
+      - "5000:5000"
     networks:
       - app-network
 
@@ -88,10 +72,10 @@ services:
     ports:
       - "32000:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: "root123"
-      MYSQL_USER: "group4"
-      MYSQL_PASSWORD: "root123"
-      MYSQL_DATABASE: "redditdb"
+       MYSQL_ROOT_PASSWORD: "root123"
+       MYSQL_USER: "group4"
+       MYSQL_PASSWORD: "root123"
+       MYSQL_DATABASE: "redditdb"
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./data:/var/lib/mysql
@@ -107,8 +91,6 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - processing
-      - processing_1
-      - processing_2
     networks:
       - app-network
 

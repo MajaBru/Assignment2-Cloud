@@ -5,7 +5,7 @@ import mysql.connector
 
 app = FastAPI()
 
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory="front-end")
 
 
 # setup mysql connection
@@ -38,7 +38,7 @@ async def get_users():
     return JSONResponse(content=users)
 
 
-# If ran (not just imported from elsewhere), launch the server.
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=5000)
+
