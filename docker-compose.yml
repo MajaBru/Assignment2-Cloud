@@ -1,25 +1,25 @@
 version: '3'
 
 services:
-  # processing layer/API Flask app
+  # processing layer/API FastAPI app
   processing:
-    image: flaskapplication:latest
     build: ./app
-    links:
-      - db
-    ports:
-      - "5002:5000"
+    image: fastapiapplication:latest
+    environment:
+      FASTAPI_ENV: development
     depends_on:
       - db
-    environment: #variable to set to developmnent
-      FLASK_ENV: development
+    deploy:
+      replicas: 3
+    networks:
+      - app-network
 
   # SQL database
   db:
     image: mysql:latest
     restart: always
     ports:
-      - "32000:3306"
+      - "5002:5000"
     environment:
       MYSQL_ROOT_PASSWORD: "root123"
       MYSQL_USER: "group4"
@@ -28,5 +28,22 @@ services:
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./data:/var/lib/mysql
+    networks:
+      - app-network
 
+  # Nginx load balancer
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - processing
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 

@@ -1,15 +1,12 @@
-
-FROM python:3.8-alpine
+# backend/Dockerfile
+FROM python:3.8
 
 WORKDIR /app
 
-COPY . /app
+COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-# Make port 5000 available to the world outside this container
-EXPOSE 5000
-EXPOSE 8080
+COPY ./app /app
 
-
-CMD ["python", "app.py"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]

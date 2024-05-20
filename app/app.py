@@ -1,10 +1,13 @@
-from flask import Flask, jsonify, request, render_template
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 import mysql.connector
 
-app = Flask(__name__, template_folder='front-end')
+app = FastAPI()
+
+templates = Jinja2Templates(directory="app/templates")
 
 
-# endra på host db
 # setup mysql connection
 def dbconn():
     config = {
@@ -16,7 +19,6 @@ def dbconn():
     }
 
     connection = mysql.connector.connect(**config)
-    # cursor can be used to do operations on the database
     cursor = connection.cursor(dictionary=True)
     cursor.execute("SELECT * FROM Users")
     results = cursor.fetchall()
@@ -25,20 +27,18 @@ def dbconn():
     return results
 
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-    # """ return jsonify(dbconn()) """
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
-# #this is new
-@app.route('/users', methods=['GET'])
-def get_users():
+@app.get("/users")
+async def get_users():
     users = dbconn()
-    return jsonify(users)
-    # """ return jsonify(dbconn()) """
+    return JSONResponse(content=users)
 
 
 # If ran (not just imported from elsewhere), launch the server.
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=5000)
