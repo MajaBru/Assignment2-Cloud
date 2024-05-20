@@ -1,56 +1,6 @@
-# version: '3'
-
-# services:
-#   # processing layer/API FastAPI app
-#   processing:
-#     build: ./app
-#     image: fastapiapplication:latest
-#     environment:
-#       FASTAPI_ENV: development
-#     depends_on:
-#       - db
-#     deploy:
-#       replicas: 3
-#     networks:
-#       - app-network
-
-#   # SQL database
-#   db:
-#     image: mysql:latest
-#     restart: always
-#     ports:
-#       - "5002:5000"
-#     environment:
-#       MYSQL_ROOT_PASSWORD: "root123"
-#       MYSQL_USER: "group4"
-#       MYSQL_PASSWORD: "root123"
-#       MYSQL_DATABASE: "redditdb"
-#     volumes:
-#       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-#       - ./data:/var/lib/mysql
-#     networks:
-#       - app-network
-
-#   # Nginx load balancer
-#   nginx:
-#     image: nginx:alpine
-#     ports:
-#       - "8000:80"
-#     volumes:
-#       - ./nginx.conf:/etc/nginx/nginx.conf
-#     depends_on:
-#       - processing
-#     networks:
-#       - app-network
-
-# networks:
-#   app-network:
-#     driver: bridge
-
 version: '3'
 
 services:
-  # FastAPI application
   processing:
     build:
       context: ./app
@@ -58,39 +8,8 @@ services:
     image: fastapiapplication:latest
     environment:
       FASTAPI_ENV: development
-    depends_on:
-      - db
     ports:
-    - "3306:3306"
-    networks:
-      - app-network
-
-  # SQL database
-  db:
-    image: mysql:latest
-    restart: always
-    ports:
-      - "5002:5000"
-    environment:
-       MYSQL_ROOT_PASSWORD: "root123"
-       MYSQL_USER: "group4"
-       MYSQL_PASSWORD: "root123"
-       MYSQL_DATABASE: "redditdb"
-    volumes:
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./data:/var/lib/mysql
-    networks:
-      - app-network
-
-  # Nginx load balancer
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "8000:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - processing
+      - "5000:5000"
     networks:
       - app-network
 
