@@ -70,7 +70,7 @@ services:
     image: mysql:latest
     restart: always
     ports:
-      - "5000:5000"
+      - "5002:5000"
     environment:
        MYSQL_ROOT_PASSWORD: "root123"
        MYSQL_USER: "group4"
