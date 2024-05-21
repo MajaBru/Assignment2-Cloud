@@ -1,49 +1,49 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from flask_mysqldb import MySQL
 import MySQLdb.cursors
 import re
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 import pymysql
+from models import User
 
 
 app = Flask(__name__, template_folder='../front-end')
-api = Api(app)
 
-db = pymysql.connect("localhost", "root", "root", "redditdb")
+db = SQLAlchemy()
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/redditdb'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
-
-
-# setup mysql connection
-""" def dbconn():
-    config = {
-        'host': "129.114.27.249",
-        'port': "3306",
-        'user': "group4",
-        'password': "root123",
-        'database': "redditdb"
-    }
-
-    connection = mysql.connector.connect(**config)
-    # cursor can be used to do operations on the database
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Users")
-    results = cursor.fetchall()
-    cursor.close()
-    connection.close()
-    return results """
+# Initialize
+db.init_app(app)
 
 
 @app.route('/')
 def index():
     return render_template('index.html')
-    """ return jsonify(dbconn()) """
+
+# retreive all users
+@app.route('/users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    user_list = [{'id': user.id, 'username': user.username, 'email': user.email, 'created_at': user.created_at} for user in users]
+    return jsonify(user_list)  
 
 
-# If ran (not just imported from elsewhere), launch the server.
-""" if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
- """
+# make db if it doesnt exist
+def create_database():
+    connection = pymysql.connect(host='localhost', user='root')
+    cursor = connection.cursor()
+    cursor.execute("CREATE DATABASE IF NOT EXISTS redditdb")
+    connection.close()
 
- if __name__ == '__main__':
-    app.run(debug=True)
+
+# Initialize the database and create the tables
+def create_tables():
+    with app.app_context():
+        db.create_all()
+
+if __name__ == '__main__':
+    create_database()
+    create_tables()
+    app.run(debug=True, port=5000)
