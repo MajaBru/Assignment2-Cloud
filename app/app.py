@@ -1,11 +1,21 @@
-from flask import Flask, jsonify, request, render_template
-import mysql.connector
+from flask import Flask, render_template, request, redirect, url_for, session
+from flask_mysqldb import MySQL
+import MySQLdb.cursors
+import re
+import pymysql
+
 
 app = Flask(__name__, template_folder='../front-end')
+api = Api(app)
+
+db = pymysql.connect("localhost", "root", "root", "redditdb")
+
+
+
 
 
 # setup mysql connection
-def dbconn():
+""" def dbconn():
     config = {
         'host': "129.114.27.249",
         'port': "3306",
@@ -21,7 +31,7 @@ def dbconn():
     results = cursor.fetchall()
     cursor.close()
     connection.close()
-    return results
+    return results """
 
 
 @app.route('/')
@@ -31,5 +41,9 @@ def index():
 
 
 # If ran (not just imported from elsewhere), launch the server.
-if __name__ == "__main__":
+""" if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+ """
+
+ if __name__ == '__main__':
+    app.run(debug=True)
