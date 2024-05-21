@@ -1,15 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import MySQLdb.cursors
 import re
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import pymysql
-from models import User
-
+from models import db, User
 
 app = Flask(__name__, template_folder='../front-end')
 
-db = SQLAlchemy()
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/redditdb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
