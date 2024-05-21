@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, url_for
 import mysql.connector
 
 app = Flask(__name__, template_folder='front-end')
@@ -14,7 +14,6 @@ def dbconn():
         'password': "root123",
         'database': "redditdb"
     }
-
     connection = mysql.connector.connect(**config)
     # cursor can be used to do operations on the database
     cursor = connection.cursor(dictionary=True)
