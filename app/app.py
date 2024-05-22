@@ -20,6 +20,7 @@ db.init_app(app)
 def index():
     return render_template('index.html')
 
+
 # retreive all users
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -40,6 +41,7 @@ def create_database():
 def create_tables():
     with app.app_context():
         db.create_all()
+
 
 if __name__ == '__main__':
     create_database()
