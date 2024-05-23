@@ -15,12 +15,12 @@ class User(db.Model):
 
 class Post(db.Model):
     __tablename__ = 'posts'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     likes_count = db.Column(db.Integer, default=0)
-    likes = db.relationship('Like', backref='post', lazy=True)
+    category = db.Column(db.Enum('dogs', 'cats', 'bunnies'), default='dogs', nullable=False)
 
 class Like(db.Model):
     __tablename__ = 'likes'

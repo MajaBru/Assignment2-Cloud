@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Posts</title>
+</head>
+<body>
+    <h1>All Posts</h1>
+    <div id="postsContainer"></div>
+
+    <script>
+        fetch('/posts')
+            .then(response => response.json())
+            .then(posts => {
+                const postsContainer = document.getElementById('postsContainer');
+                posts.forEach(post => {
+                    const postElement = document.createElement('div');
+                    postElement.innerHTML = `
+                        <p>User ID: ${post.user_id}</p>
+                        <p>Text: ${post.text}</p>
+                        <p>Category: ${post.category}</p>
+                        <p>Likes: ${post.likes_count}</p>
+                        <hr>
+                    `;
+                    postsContainer.appendChild(postElement);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    </script>
+</body>
+</html>

@@ -108,10 +108,11 @@ def get_users():
 @app.route('/posts', methods=['POST'])
 def create_post():
     data = request.get_json()
-    new_post = Post(user_id=data['user_id'], text=data['text'])
+    new_post = Post(user_id=data['user_id'], text=data['text'], category=data['category'])
     db.session.add(new_post)
     db.session.commit()
     return jsonify({'message': 'New post created!'})
+
 
 @app.route('/likes', methods=['POST'])
 def like_post():
@@ -123,9 +124,15 @@ def like_post():
     db.session.commit()
     return jsonify({'message': 'Post liked!'})
 
+# Create posts for testing purposes
 @app.route('/create_post.html')
 def create_post_page():
     return render_template('create_post.html')
+
+# Look at all current posts for testing purposes
+@app.route('/all_posts.html')
+def all_posts_page():
+    return render_template('all_posts.html')
 
 @app.route('/posts', methods=['GET'])
 def get_posts():
