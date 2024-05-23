@@ -3,4 +3,3 @@ mysql-connector
 flask-sqlalchemy
 pymysql
 flask-bcrypt
-flask-cors

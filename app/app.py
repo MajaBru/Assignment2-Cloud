@@ -6,7 +6,6 @@ from datetime import datetime
 import pymysql
 from models import db, User
 from flask_bcrypt import Bcrypt
-import subprocess
 
 app = Flask(__name__, template_folder='../front-end', static_folder='../front-end/static')
 
