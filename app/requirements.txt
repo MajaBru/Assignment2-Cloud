@@ -1,3 +1,6 @@
 Flask==3.0.2
 mysql-connector
-flask-mysqldb
+flask-sqlalchemy
+pymysql
+flask-bcrypt
+flask-cors

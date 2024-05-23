@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">    
+    <title>Home</title>
+</head>
+<body>
+
+    <main>
+
+        <header>
+            <nav>
+                <div class="logo-container">
+                    <img src="/static/img/logo.png" alt="logo">
+                </div>
+                <ul>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </ul>
+            </nav>
+        </header>
+
+    <h1>Homepage reddit</h1>
+
+    <h2>Welcome, <span id="username-home">{{ username }}!</span></h2>
+
+    <h3>All users</h3>
+    <div id="data-container">
+        
+    </div>
+
+    </main>
+    <script>
+        // fetch data from the Flask 
+        fetch('/users')
+            .then(response => response.json())
+            .then(data => {
+                
+                const users = data.map(user => `<p>${user.username} - ${user.email}</p>`).join('');
+                document.getElementById('data-container').innerHTML = users;
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    </script>
+</body>
+</html>
+
