@@ -4,7 +4,7 @@ import re, os
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import pymysql
-from models import db, User
+from models import db, User, Post, Like
 from flask_bcrypt import Bcrypt
 
 app = Flask(__name__, template_folder='../front-end', static_folder='../front-end/static')
@@ -119,6 +119,36 @@ def create_database():
     connection.close()
 
 
+@app.route('/posts', methods=['POST'])
+def create_post():
+    data = request.get_json()
+    new_post = Post(user_id=data['user_id'], text=data['text'])
+    db.session.add(new_post)
+    db.session.commit()
+    return jsonify({'message': 'New post created!'})
+
+@app.route('/likes', methods=['POST'])
+def like_post():
+    data = request.get_json()
+    new_like = Like(user_id=data['user_id'], post_id=data['post_id'])
+    db.session.add(new_like)
+    post = Post.query.get(data['post_id'])
+    post.likes_count += 1
+    db.session.commit()
+    return jsonify({'message': 'Post liked!'})
+
+
+@app.route('/posts', methods=['GET'])
+def get_posts():
+    posts = Post.query.all()
+    post_list = [{'id': post.id, 'user_id': post.user_id, 'text': post.text, 'created_at': post.created_at, 'likes_count': post.likes_count} for post in posts]
+    return jsonify(post_list)
+
+@app.route('/likes', methods=['GET'])
+def get_likes():
+    likes = Like.query.all()
+    like_list = [{'id': like.id, 'user_id': like.user_id, 'post_id': like.post_id, 'created_at': like.created_at} for like in likes]
+    return jsonify(like_list)
 
 # Initialize the database and create the tables
 def create_tables():
