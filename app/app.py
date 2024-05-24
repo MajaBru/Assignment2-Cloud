@@ -1,52 +1,36 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, session, jsonify
+import re, os
 from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt
-from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import pymysql
-import os
-import re
+from flask_bcrypt import Bcrypt
+from models import db, User, Post, Like
 
 app = Flask(__name__, template_folder='../front-end', static_folder='../front-end/static')
 
 app.secret_key = 'your_secret_key_here'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@db/redditdb'
+# Updated to remove the password
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/redditdb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+app.config['SESSION_FILE_DIR'] = os.path.join(app.root_path, 'sessions')
+os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
+
+# Initialize
+db.init_app(app)
 bcrypt = Bcrypt(app)
 
-from models import db, User, Post, Like
-
-# In-memory structure to store like counts
-like_batch = {}
-
-# Initialize database
+# Make sure to create the database if it doesn't exist
 def create_database():
-    connection = pymysql.connect(host='db', user='root', password='')
+    connection = pymysql.connect(host='localhost', user='root')
     cursor = connection.cursor()
     cursor.execute("CREATE DATABASE IF NOT EXISTS redditdb")
+    cursor.execute("SHOW DATABASES")
+    for database in cursor:
+        print(database)
+    cursor.close()
     connection.close()
-
-def create_tables():
-    with app.app_context():
-        db.create_all()
-
-# Background task to process like batches
-def process_likes():
-    with app.app_context():
-        for post_id, like_count in like_batch.items():
-            post = Post.query.get(post_id)
-            if post:
-                post.likes_count += like_count
-                db.session.commit()
-        like_batch.clear()
-
-# Scheduler to run the background task every minute
-scheduler = BackgroundScheduler()
-scheduler.add_job(func=process_likes, trigger="interval", seconds=60)
-scheduler.start()
 
 @app.route('/')
 def index():
@@ -60,7 +44,7 @@ def register():
         email = request.form['email']
         password = request.form['password']
 
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')  # Hashing with bcrypt
 
         existing_user = User.query.filter_by(username=username).first()
 
@@ -94,8 +78,9 @@ def login():
             return redirect('/home')
         else:
             msg = 'Invalid username or password!'
+            return render_template('login.html', msg=msg)
 
-    return render_template('login.html', msg=msg)
+    return render_template('login.html')
 
 @app.route('/logout')
 def logout():
@@ -110,10 +95,10 @@ def home():
         username = session.get('username')
         email = session.get('email')
         if username and email:
-            return render_template('home.html', username=username)
+            return render_template('home.html', username=session['username'])
     return redirect('/login')
 
-
+# Retrieve all users in JSON format
 @app.route('/users', methods=['GET'])
 def get_users():
     users = User.query.all()
@@ -128,22 +113,32 @@ def create_post():
     db.session.commit()
     return jsonify({'message': 'New post created!'})
 
-@app.route('/posts', methods=['GET'])
-def get_posts():
-    category = request.args.get('category')
-    if category:
-        posts = Post.query.filter_by(category=category).all()
-    else:
-        posts = Post.query.all()
-    post_list = [{'id': post.id, 'user_id': post.user_id, 'text': post.text, 'created_at': post.created_at, 'likes_count': post.likes_count, 'category': post.category} for post in posts]
-    return jsonify(post_list)
 
 @app.route('/likes', methods=['POST'])
 def like_post():
     data = request.get_json()
-    post_id = data['post_id']
-    like_batch[post_id] = like_batch.get(post_id, 0) + 1
+    new_like = Like(user_id=data['user_id'], post_id=data['post_id'])
+    db.session.add(new_like)
+    post = Post.query.get(data['post_id'])
+    post.likes_count += 1
+    db.session.commit()
     return jsonify({'message': 'Post liked!'})
+
+# Create posts for testing purposes
+@app.route('/create_post.html')
+def create_post_page():
+    return render_template('create_post.html')
+
+# Look at all current posts for testing purposes
+@app.route('/all_posts.html')
+def all_posts_page():
+    return render_template('all_posts.html')
+
+@app.route('/posts', methods=['GET'])
+def get_posts():
+    posts = Post.query.all()
+    post_list = [{'id': post.id, 'user_id': post.user_id, 'text': post.text, 'created_at': post.created_at, 'likes_count': post.likes_count} for post in posts]
+    return jsonify(post_list)
 
 @app.route('/likes', methods=['GET'])
 def get_likes():
@@ -151,49 +146,13 @@ def get_likes():
     like_list = [{'id': like.id, 'user_id': like.user_id, 'post_id': like.post_id, 'created_at': like.created_at} for like in likes]
     return jsonify(like_list)
 
-@app.route('/posts/dogs', methods=['GET', 'POST'])
-def posts_dogs():
-    if request.method == 'POST':
-        if 'user_id' in session:
-            user_id = session['user_id']
-            text = request.form['text']
-            new_post = Post(user_id=user_id, text=text, category='dogs')
-            db.session.add(new_post)
-            db.session.commit()
-            return redirect('/posts/dogs')
-        return redirect('/login')
-    posts = Post.query.filter_by(category='dogs').all()
-    return render_template('posts.html', posts=posts, category='Dogs')
-
-@app.route('/posts/cats', methods=['GET', 'POST'])
-def posts_cats():
-    if request.method == 'POST':
-        if 'user_id' in session:
-            user_id = session['user_id']
-            text = request.form['text']
-            new_post = Post(user_id=user_id, text=text, category='cats')
-            db.session.add(new_post)
-            db.session.commit()
-            return redirect('/posts/cats')
-        return redirect('/login')
-    posts = Post.query.filter_by(category='cats').all()
-    return render_template('posts.html', posts=posts, category='Cats')
-
-@app.route('/posts/bunnies', methods=['GET', 'POST'])
-def posts_bunnies():
-    if request.method == 'POST':
-        if 'user_id' in session:
-            user_id = session['user_id']
-            text = request.form['text']
-            new_post = Post(user_id=user_id, text=text, category='bunnies')
-            db.session.add(new_post)
-            db.session.commit()
-            return redirect('/posts/bunnies')
-        return redirect('/login')
-    posts = Post.query.filter_by(category='bunnies').all()
-    return render_template('posts.html', posts=posts, category='Bunnies')
+# Initialize the database and create the tables
+def create_tables():
+    with app.app_context():
+        db.create_all()
+        print('Tables created')
 
 if __name__ == '__main__':
     create_database()
     create_tables()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, port=5000)

@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">    
     <title>Home</title>
 </head>
 <body>
+
     <main>
+
         <header>
             <nav>
                 <div class="logo-container">
-                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo">
+                    <img src="/static/img/logo.png" alt="logo">
                 </div>
                 <ul>
                     <a href="{{ url_for('logout') }}">Logout</a>
@@ -19,56 +21,27 @@
             </nav>
         </header>
 
-        <h1>Homepage Reddit</h1>
-        <h2>Welcome, <span id="username-home">{{ username }}!</span></h2>
+    <h1>Homepage reddit</h1>
 
-        <h3>Subreddits</h3>
-        <ul>
-            <li><a href="{{ url_for('posts_dogs') }}">Dogs</a></li>
-            <li><a href="{{ url_for('posts_cats') }}">Cats</a></li>
-            <li><a href="{{ url_for('posts_bunnies') }}">Bunnies</a></li>
-        </ul>
+    <h2>Welcome, <span id="username-home">{{ username }}!</span></h2>
 
-        <h3>All Posts</h3>
-        <div id="postsContainer"></div>
+    <h3>All users</h3>
+    <div id="data-container">
+        
+    </div>
+
     </main>
-
     <script>
-        // Fetch all posts
-        fetch('/posts')
+        // fetch data from the Flask 
+        fetch('/users')
             .then(response => response.json())
             .then(data => {
-                const posts = data.map(post => `
-                    <div>
-                        <p>User ID: ${post.user_id}</p>
-                        <p>Category: ${post.category}</p>
-                        <p>Text: ${post.text}</p>
-                        <p>Likes: ${post.likes_count}</p>
-                        <button onclick="likePost(${post.id})">Like</button>
-                        <hr>
-                    </div>
-                `).join('');
-                document.getElementById('postsContainer').innerHTML = posts;
+                
+                const users = data.map(user => `<p>${user.username} - ${user.email}</p>`).join('');
+                document.getElementById('data-container').innerHTML = users;
             })
             .catch(error => console.error('Error fetching data:', error));
-
-        function likePost(postId) {
-            fetch('/likes', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ user_id: {{ session['user_id'] }}, post_id: postId }) 
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                location.reload(); 
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
     </script>
 </body>
 </html>
+

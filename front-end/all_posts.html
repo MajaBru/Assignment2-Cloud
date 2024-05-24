@@ -21,7 +21,6 @@
                         <p>Text: ${post.text}</p>
                         <p>Category: ${post.category}</p>
                         <p>Likes: ${post.likes_count}</p>
-                        <button onclick="likePost(${post.id})">Like</button>
                         <hr>
                     `;
                     postsContainer.appendChild(postElement);
@@ -30,24 +29,6 @@
             .catch(error => {
                 console.error('Error:', error);
             });
-
-        function likePost(postId) {
-            fetch('/likes', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ user_id: 1, post_id: postId }) // Assuming user_id is 1 for demonstration
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                location.reload(); // Refresh to see updated like count
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
     </script>
 </body>
 </html>
