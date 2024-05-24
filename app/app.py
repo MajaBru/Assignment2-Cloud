@@ -5,6 +5,8 @@ from datetime import datetime
 import pymysql
 from flask_bcrypt import Bcrypt
 from models import db, User, Post, Like
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 app = Flask(__name__, template_folder='../front-end', static_folder='../front-end/static')
 
@@ -20,6 +22,24 @@ os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 # Initialize
 db.init_app(app)
 bcrypt = Bcrypt(app)
+
+# Scheduler
+scheduler = BackgroundScheduler()
+
+def batch_likes():
+    # Add your logic to batch process likes
+    print("Batching likes...")  # Placeholder for actual batching logic
+    with app.app_context():
+        # Example: Commit pending likes to the database
+        db.session.commit()
+        print("Likes batched and committed.")
+
+# Schedule the job
+scheduler.add_job(func=batch_likes, trigger="interval", minutes=1)
+scheduler.start()
+
+# Shut down the scheduler when exiting the app
+atexit.register(lambda: scheduler.shutdown())
 
 # Make sure to create the database if it doesn't exist
 def create_database():
