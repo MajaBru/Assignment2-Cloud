@@ -166,6 +166,31 @@ def get_likes():
     like_list = [{'id': like.id, 'user_id': like.user_id, 'post_id': like.post_id, 'created_at': like.created_at} for like in likes]
     return jsonify(like_list)
 
+# Routes to each category using the same template
+@app.route('/dogs')
+def dogs_subreddit():
+    if 'loggedin' in session:
+        return render_template('subreddit.html', category='Dogs', username=session['username'])
+    else:
+        # Redirect to login if user is not logged in
+        return redirect('/login')
+    
+    @app.route('/cats')
+def dogs_subreddit():
+    if 'loggedin' in session:
+        return render_template('subreddit.html', category='Dogs', username=session['username'])
+    else:
+        # Redirect to login if user is not logged in
+        return redirect('/login')
+    
+    @app.route('/bunnies')
+def dogs_subreddit():
+    if 'loggedin' in session:
+        return render_template('subreddit.html', category='Dogs', username=session['username'])
+    else:
+        # Redirect to login if user is not logged in
+        return redirect('/login')
+
 # Initialize the database and create the tables
 def create_tables():
     with app.app_context():

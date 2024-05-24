@@ -21,16 +21,22 @@
             </nav>
         </header>
 
-    <h1>Homepage reddit</h1>
+        <h1>Homepage reddit</h1>
 
-    <h2>Welcome, <span id="username-home">{{ username }}!</span></h2>
+        <h2>Welcome, <span id="username-home">{{ username }}!</span></h2>
 
-    <h3>All users</h3>
-    <div id="data-container">
-        
-    </div>
+        <h3>All users</h3>
+        <div id="data-container"></div>
+
+        <h3>Subreddit Categories:</h3>
+        <ul>
+            <li><a href="/dogs">Dogs</a></li>
+            <li><a href="/cats">Cats</a></li>
+            <li><a href="/bunnies">Bunnies</a></li>
+        </ul>
 
     </main>
+
     <script>
         // fetch data from the Flask 
         fetch('/users')
@@ -44,4 +50,3 @@
     </script>
 </body>
 </html>
-
