@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import pymysql
 from flask_bcrypt import Bcrypt
-from models import db, User, Post, Like
+from models import db, User, Post, Like, LikeBatch
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 
@@ -23,23 +23,6 @@ os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 db.init_app(app)
 bcrypt = Bcrypt(app)
 
-# Scheduler
-scheduler = BackgroundScheduler()
-
-def batch_likes():
-    # Add your logic to batch process likes
-    print("Batching likes...")  # Placeholder for actual batching logic
-    with app.app_context():
-        # Example: Commit pending likes to the database
-        db.session.commit()
-        print("Likes batched and committed.")
-
-# Schedule the job
-scheduler.add_job(func=batch_likes, trigger="interval", minutes=1)
-scheduler.start()
-
-# Shut down the scheduler when exiting the app
-atexit.register(lambda: scheduler.shutdown())
 
 # Make sure to create the database if it doesn't exist
 def create_database():
@@ -139,10 +122,19 @@ def like_post():
     data = request.get_json()
     new_like = Like(user_id=data['user_id'], post_id=data['post_id'])
     db.session.add(new_like)
-    post = Post.query.get(data['post_id'])
-    post.likes_count += 1
+    new_like_batch = LikeBatch(status='pending', like_id=new_like.id, created_at=datetime.utcnow())
+    db.session.add(new_like_batch)
     db.session.commit()
     return jsonify({'message': 'Post liked!'})
+
+def process_like_batches():
+    like_batches = LikeBatch.query.filter_by(status='pending').all()
+    for like_batch in like_batches:
+        post = Post.query.get(like_batch.like.post_id)
+        post.likes_count += 1
+        like_batch.status = 'processed'
+    db.session.commit()
+    db.session.close() 
 
 # Create posts for testing purposes
 @app.route('/create_post.html')
@@ -166,6 +158,7 @@ def get_likes():
     like_list = [{'id': like.id, 'user_id': like.user_id, 'post_id': like.post_id, 'created_at': like.created_at} for like in likes]
     return jsonify(like_list)
 
+
 # Routes to each category using the same template
 @app.route('/dogs')
 def dogs_subreddit():
@@ -175,18 +168,18 @@ def dogs_subreddit():
         # Redirect to login if user is not logged in
         return redirect('/login')
     
-    @app.route('/cats')
-def dogs_subreddit():
+@app.route('/cats')
+def cats_subreddit():
     if 'loggedin' in session:
-        return render_template('subreddit.html', category='Dogs', username=session['username'])
+        return render_template('subreddit.html', category='Cats', username=session['username'])
     else:
         # Redirect to login if user is not logged in
         return redirect('/login')
     
-    @app.route('/bunnies')
-def dogs_subreddit():
+@app.route('/bunnies')
+def bunnies_subreddit():
     if 'loggedin' in session:
-        return render_template('subreddit.html', category='Dogs', username=session['username'])
+        return render_template('subreddit.html', category='Bunnies', username=session['username'])
     else:
         # Redirect to login if user is not logged in
         return redirect('/login')
@@ -200,4 +193,9 @@ def create_tables():
 if __name__ == '__main__':
     create_database()
     create_tables()
+    # Run the like batch processing job every minute
+    from apscheduler.schedulers.background import BackgroundScheduler
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(process_like_batches, 'interval', minutes=1)
+    scheduler.start()
     app.run(debug=True, port=5000)

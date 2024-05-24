@@ -29,4 +29,8 @@ class Like(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    
+    class LikeBatch(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.String(10), nullable=False)
+    like_id = db.Column(db.Integer, db.ForeignKey('like.id'), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
