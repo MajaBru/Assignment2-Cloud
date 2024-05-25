@@ -4,31 +4,28 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import pymysql
 from flask_bcrypt import Bcrypt
-from models import db, User, Post, Like
+from models import db, User, Post
+from like_batcher import LikeBatcher
+import atexit
 
 app = Flask(__name__, template_folder='../front-end', static_folder='../front-end/static')
 
 app.secret_key = 'your_secret_key_here'
 
-# Updated to remove the password
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/redditdb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SESSION_FILE_DIR'] = os.path.join(app.root_path, 'sessions')
 os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 
-# Initialize
 db.init_app(app)
 bcrypt = Bcrypt(app)
+like_batcher = LikeBatcher()
 
-# Make sure to create the database if it doesn't exist
 def create_database():
     connection = pymysql.connect(host='localhost', user='root')
     cursor = connection.cursor()
     cursor.execute("CREATE DATABASE IF NOT EXISTS redditdb")
-    cursor.execute("SHOW DATABASES")
-    for database in cursor:
-        print(database)
     cursor.close()
     connection.close()
 
@@ -44,7 +41,7 @@ def register():
         email = request.form['email']
         password = request.form['password']
 
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')  # Hashing with bcrypt
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
         existing_user = User.query.filter_by(username=username).first()
 
@@ -95,10 +92,10 @@ def home():
         username = session.get('username')
         email = session.get('email')
         if username and email:
-            return render_template('home.html', username=session['username'])
+            posts = Post.query.order_by(Post.created_at.desc()).all()  # Sort posts by created_at in descending order
+            return render_template('home.html', username=session['username'], posts=posts)
     return redirect('/login')
 
-# Retrieve all users in JSON format
 @app.route('/users', methods=['GET'])
 def get_users():
     users = User.query.all()
@@ -108,45 +105,114 @@ def get_users():
 @app.route('/posts', methods=['POST'])
 def create_post():
     data = request.get_json()
-    new_post = Post(user_id=data['user_id'], text=data['text'], category=data['category'])
-    db.session.add(new_post)
-    db.session.commit()
-    return jsonify({'message': 'New post created!'})
+    current_user = User.query.filter_by(username=session.get('username')).first()
+    if current_user:
+        new_post = Post(
+            user_id=current_user.id,
+            text=data['text'],
+            category=data['category']
+        )
+        db.session.add(new_post)
+        db.session.commit()
+        return jsonify({'message': 'New post created!'})
+    else:
+        return jsonify({'error': 'User not found!'})
 
-
-@app.route('/likes', methods=['POST'])
-def like_post():
-    data = request.get_json()
-    new_like = Like(user_id=data['user_id'], post_id=data['post_id'])
-    db.session.add(new_like)
-    post = Post.query.get(data['post_id'])
-    post.likes_count += 1
-    db.session.commit()
-    return jsonify({'message': 'Post liked!'})
-
-# Create posts for testing purposes
-@app.route('/create_post.html')
-def create_post_page():
-    return render_template('create_post.html')
-
-# Look at all current posts for testing purposes
-@app.route('/all_posts.html')
-def all_posts_page():
-    return render_template('all_posts.html')
 
 @app.route('/posts', methods=['GET'])
 def get_posts():
-    posts = Post.query.all()
-    post_list = [{'id': post.id, 'user_id': post.user_id, 'text': post.text, 'created_at': post.created_at, 'likes_count': post.likes_count} for post in posts]
+    posts = Post.query.order_by(Post.created_at.desc()).all()
+    post_list = []
+    for post in posts:
+        # Get the username associated with the user_id of each post
+        username = User.query.filter_by(id=post.user_id).first().username
+        post_data = {
+            'id': post.id,
+            'user_id': post.user_id,
+            'username': username,
+            'text': post.text,
+            'category': post.category,
+            'created_at': post.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'likes_count': post.likes_count
+        }
+        post_list.append(post_data)
     return jsonify(post_list)
 
-@app.route('/likes', methods=['GET'])
-def get_likes():
-    likes = Like.query.all()
-    like_list = [{'id': like.id, 'user_id': like.user_id, 'post_id': like.post_id, 'created_at': like.created_at} for like in likes]
-    return jsonify(like_list)
+@app.route('/likes', methods=['POST'])
+def like_post():
+    if request.is_json:
+        data = request.json
+        post_id = data.get('post_id')
+        likes_count = data.get('likes_count', 0)
 
-# Initialize the database and create the tables
+        if post_id and likes_count > 0:
+            # Check if the post exists
+            post = Post.query.get(post_id)
+            if post:
+                # Increment the likes_count of the post
+                post.likes_count += likes_count
+                db.session.commit()
+
+                return jsonify({'success': True, 'message': 'Post liked successfully!'})
+            else:
+                return jsonify({'success': False, 'message': 'Post not found!'})
+        else:
+            return jsonify({'success': False, 'message': 'Invalid data provided!'})
+    else:
+        return jsonify({'success': False, 'message': 'Unsupported Media Type'}), 415
+
+
+
+
+
+@app.route('/dogs', methods=['GET', 'POST'])
+def dogs_subreddit():
+    if 'loggedin' not in session:
+        return redirect('/login')
+    
+    if request.method == 'POST':
+        text = request.form['text']
+        user_id = User.query.filter_by(username=session['username']).first().id
+        new_post = Post(user_id=user_id, text=text, category='Dogs')
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect('/dogs')
+    
+    posts = Post.query.filter_by(category='Dogs').order_by(Post.created_at.desc()).all() 
+    return render_template('subreddit.html', category='Dogs', posts=posts, username=session['username'])
+
+@app.route('/cats', methods=['GET', 'POST'])
+def cats_subreddit():
+    if 'loggedin' not in session:
+        return redirect('/login')
+    
+    if request.method == 'POST':
+        text = request.form['text']
+        user_id = User.query.filter_by(username=session['username']).first().id
+        new_post = Post(user_id=user_id, text=text, category='Cats')
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect('/cats')
+    
+    posts = Post.query.filter_by(category='Cats').order_by(Post.created_at.desc()).all() 
+    return render_template('subreddit.html', category='Cats', posts=posts, username=session['username'])
+
+@app.route('/bunnies', methods=['GET', 'POST'])
+def bunnies_subreddit():
+    if 'loggedin' not in session:
+        return redirect('/login')
+    
+    if request.method == 'POST':
+        text = request.form['text']
+        user_id = User.query.filter_by(username=session['username']).first().id
+        new_post = Post(user_id=user_id, text=text, category='Bunnies')
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect('/bunnies')
+    
+    posts = Post.query.filter_by(category='Bunnies').order_by(Post.created_at.desc()).all() 
+    return render_template('subreddit.html', category='Bunnies', posts=posts, username=session['username'])
+
 def create_tables():
     with app.app_context():
         db.create_all()

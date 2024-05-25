@@ -3,3 +3,4 @@ mysql-connector
 flask-sqlalchemy
 pymysql
 Flask-Bcrypt
+APScheduler
