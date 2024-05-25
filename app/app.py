@@ -4,8 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import pymysql
 from flask_bcrypt import Bcrypt
-from models import db, User, Post, Like, LikeBatch
-from apscheduler.schedulers.background import BackgroundScheduler
+from models import db, User, Post
 import atexit
 
 app = Flask(__name__, template_folder='../front-end', static_folder='../front-end/static')
@@ -91,7 +90,7 @@ def home():
         username = session.get('username')
         email = session.get('email')
         if username and email:
-            posts = Post.query.all()
+            posts = Post.query.order_by(Post.created_at.desc()).all()  # Sort posts by created_at in descending order
             return render_template('home.html', username=session['username'], posts=posts)
     return redirect('/login')
 
@@ -118,26 +117,6 @@ def create_post():
         return jsonify({'error': 'User not found!'})
 
 
-
-@app.route('/likes', methods=['POST'])
-def like_post():
-    data = request.get_json()
-    new_like = Like(user_id=data['user_id'], post_id=data['post_id'])
-    db.session.add(new_like)
-    new_like_batch = LikeBatch(status='pending', like_id=new_like.id, created_at=datetime.utcnow())
-    db.session.add(new_like_batch)
-    db.session.commit()
-    return jsonify({'message': 'Post liked!'})
-
-def process_like_batches():
-    like_batches = LikeBatch.query.filter_by(status='pending').all()
-    for like_batch in like_batches:
-        post = Post.query.get(like_batch.like.post_id)
-        post.likes_count += 1
-        like_batch.status = 'processed'
-    db.session.commit()
-    db.session.close()
-
 @app.route('/posts', methods=['GET'])
 def get_posts():
     posts = Post.query.order_by(Post.created_at.desc()).all()
@@ -148,21 +127,32 @@ def get_posts():
         post_data = {
             'id': post.id,
             'user_id': post.user_id,
-            'username': username,  # Add the username to the post data
+            'username': username,
             'text': post.text,
             'category': post.category,
-            'created_at': post.created_at.strftime('%Y-%m-%d %H:%M:%S'),  # Format the datetime
+            'created_at': post.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'likes_count': post.likes_count
         }
         post_list.append(post_data)
     return jsonify(post_list)
 
+@app.route('/likes', methods=['POST'])
+def like_post():
+    if request.is_json:
+        data = request.json
+        post_id = data.get('post_id')
+        # Check if the post exists
+        post = Post.query.get(post_id)
+        if post:
+            # Increment the likes_count of the post
+            post.likes_count += 1
+            db.session.commit()
+            return jsonify({'message': 'Post liked successfully!'})
+        else:
+            return jsonify({'error': 'Post not found!'})
+    else:
+        return jsonify({'error': 'Unsupported Media Type'}), 415
 
-@app.route('/likes', methods=['GET'])
-def get_likes():
-    likes = Like.query.all()
-    like_list = [{'id': like.id, 'user_id': like.user_id, 'post_id': like.post_id, 'created_at': like.created_at} for like in likes]
-    return jsonify(like_list)
 
 @app.route('/dogs', methods=['GET', 'POST'])
 def dogs_subreddit():
@@ -220,7 +210,4 @@ def create_tables():
 if __name__ == '__main__':
     create_database()
     create_tables()
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(process_like_batches, 'interval', minutes=1)
-    scheduler.start()
     app.run(debug=True, port=5000)

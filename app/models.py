@@ -12,6 +12,10 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    def __repr__(self):
+        return f"User('{self.username}', '{self.email}', '{self.created_at}')"
+
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -20,23 +24,5 @@ class Post(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     likes_count = db.Column(db.Integer, default=0)
 
-    # Define a relationship with the User model
-    user = db.relationship('User', backref=db.backref('posts', lazy=True))
-
-
-class Like(db.Model):
-    __tablename__ = 'like'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    user = db.relationship('User', backref=db.backref('likes', lazy=True))
-    post = db.relationship('Post', backref=db.backref('likes', lazy=True))
-
-class LikeBatch(db.Model):
-    __tablename__ = 'like_batch'
-    id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(50), nullable=False)
-    like_id = db.Column(db.Integer, db.ForeignKey('like.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    like = db.relationship('Like', backref=db.backref('like_batches', lazy=True))
+    def __repr__(self):
+        return f"Post('{self.text}', '{self.category}', '{self.created_at}')"
