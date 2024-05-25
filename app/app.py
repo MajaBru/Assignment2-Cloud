@@ -12,26 +12,19 @@ app = Flask(__name__, template_folder='../front-end', static_folder='../front-en
 
 app.secret_key = 'your_secret_key_here'
 
-# Updated to remove the password
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/redditdb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SESSION_FILE_DIR'] = os.path.join(app.root_path, 'sessions')
 os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 
-# Initialize
 db.init_app(app)
 bcrypt = Bcrypt(app)
 
-
-# Make sure to create the database if it doesn't exist
 def create_database():
     connection = pymysql.connect(host='localhost', user='root')
     cursor = connection.cursor()
     cursor.execute("CREATE DATABASE IF NOT EXISTS redditdb")
-    cursor.execute("SHOW DATABASES")
-    for database in cursor:
-        print(database)
     cursor.close()
     connection.close()
 
@@ -47,7 +40,7 @@ def register():
         email = request.form['email']
         password = request.form['password']
 
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')  # Hashing with bcrypt
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
         existing_user = User.query.filter_by(username=username).first()
 
@@ -101,7 +94,6 @@ def home():
             return render_template('home.html', username=session['username'])
     return redirect('/login')
 
-# Retrieve all users in JSON format
 @app.route('/users', methods=['GET'])
 def get_users():
     users = User.query.all()
@@ -115,7 +107,6 @@ def create_post():
     db.session.add(new_post)
     db.session.commit()
     return jsonify({'message': 'New post created!'})
-
 
 @app.route('/likes', methods=['POST'])
 def like_post():
@@ -134,14 +125,12 @@ def process_like_batches():
         post.likes_count += 1
         like_batch.status = 'processed'
     db.session.commit()
-    db.session.close() 
+    db.session.close()
 
-# Create posts for testing purposes
 @app.route('/create_post.html')
 def create_post_page():
     return render_template('create_post.html')
 
-# Look at all current posts for testing purposes
 @app.route('/all_posts.html')
 def all_posts_page():
     return render_template('all_posts.html')
@@ -158,33 +147,54 @@ def get_likes():
     like_list = [{'id': like.id, 'user_id': like.user_id, 'post_id': like.post_id, 'created_at': like.created_at} for like in likes]
     return jsonify(like_list)
 
-
-# Routes to each category using the same template
-@app.route('/dogs')
+@app.route('/dogs', methods=['GET', 'POST'])
 def dogs_subreddit():
-    if 'loggedin' in session:
-        return render_template('subreddit.html', category='Dogs', username=session['username'])
-    else:
-        # Redirect to login if user is not logged in
+    if 'loggedin' not in session:
         return redirect('/login')
     
-@app.route('/cats')
-def cats_subreddit():
-    if 'loggedin' in session:
-        return render_template('subreddit.html', category='Cats', username=session['username'])
-    else:
-        # Redirect to login if user is not logged in
-        return redirect('/login')
+    if request.method == 'POST':
+        text = request.form['text']
+        user_id = User.query.filter_by(username=session['username']).first().id
+        new_post = Post(user_id=user_id, text=text, category='Dogs')
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect('/dogs')
     
-@app.route('/bunnies')
-def bunnies_subreddit():
-    if 'loggedin' in session:
-        return render_template('subreddit.html', category='Bunnies', username=session['username'])
-    else:
-        # Redirect to login if user is not logged in
-        return redirect('/login')
+    posts = Post.query.filter_by(category='Dogs').all()
+    return render_template('subreddit.html', category='Dogs', posts=posts, username=session['username'])
 
-# Initialize the database and create the tables
+@app.route('/cats', methods=['GET', 'POST'])
+def cats_subreddit():
+    if 'loggedin' not in session:
+        return redirect('/login')
+    
+    if request.method == 'POST':
+        text = request.form['text']
+        user_id = User.query.filter_by(username=session['username']).first().id
+        new_post = Post(user_id=user_id, text=text, category='Cats')
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect('/cats')
+    
+    posts = Post.query.filter_by(category='Cats').all()
+    return render_template('subreddit.html', category='Cats', posts=posts, username=session['username'])
+
+@app.route('/bunnies', methods=['GET', 'POST'])
+def bunnies_subreddit():
+    if 'loggedin' not in session:
+        return redirect('/login')
+    
+    if request.method == 'POST':
+        text = request.form['text']
+        user_id = User.query.filter_by(username=session['username']).first().id
+        new_post = Post(user_id=user_id, text=text, category='Bunnies')
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect('/bunnies')
+    
+    posts = Post.query.filter_by(category='Bunnies').all()
+    return render_template('subreddit.html', category='Bunnies', posts=posts, username=session['username'])
+
 def create_tables():
     with app.app_context():
         db.create_all()
@@ -193,8 +203,6 @@ def create_tables():
 if __name__ == '__main__':
     create_database()
     create_tables()
-    # Run the like batch processing job every minute
-    from apscheduler.schedulers.background import BackgroundScheduler
     scheduler = BackgroundScheduler()
     scheduler.add_job(process_like_batches, 'interval', minutes=1)
     scheduler.start()
