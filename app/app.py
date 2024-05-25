@@ -140,7 +140,7 @@ def process_like_batches():
 
 @app.route('/posts', methods=['GET'])
 def get_posts():
-    posts = Post.query.all()
+    posts = Post.query.order_by(Post.created_at.desc()).all()
     post_list = []
     for post in posts:
         # Get the username associated with the user_id of each post
@@ -177,7 +177,7 @@ def dogs_subreddit():
         db.session.commit()
         return redirect('/dogs')
     
-    posts = Post.query.filter_by(category='Dogs').all()
+    posts = Post.query.filter_by(category='Dogs').order_by(Post.created_at.desc()).all() 
     return render_template('subreddit.html', category='Dogs', posts=posts, username=session['username'])
 
 @app.route('/cats', methods=['GET', 'POST'])
@@ -193,7 +193,7 @@ def cats_subreddit():
         db.session.commit()
         return redirect('/cats')
     
-    posts = Post.query.filter_by(category='Cats').all()
+    posts = Post.query.filter_by(category='Cats').order_by(Post.created_at.desc()).all() 
     return render_template('subreddit.html', category='Cats', posts=posts, username=session['username'])
 
 @app.route('/bunnies', methods=['GET', 'POST'])
@@ -209,7 +209,7 @@ def bunnies_subreddit():
         db.session.commit()
         return redirect('/bunnies')
     
-    posts = Post.query.filter_by(category='Bunnies').all()
+    posts = Post.query.filter_by(category='Bunnies').order_by(Post.created_at.desc()).all() 
     return render_template('subreddit.html', category='Bunnies', posts=posts, username=session['username'])
 
 def create_tables():
