@@ -91,7 +91,8 @@ def home():
         username = session.get('username')
         email = session.get('email')
         if username and email:
-            return render_template('home.html', username=session['username'])
+            posts = Post.query.all()
+            return render_template('home.html', username=session['username'], posts=posts)
     return redirect('/login')
 
 @app.route('/users', methods=['GET'])
@@ -103,10 +104,20 @@ def get_users():
 @app.route('/posts', methods=['POST'])
 def create_post():
     data = request.get_json()
-    new_post = Post(user_id=data['user_id'], text=data['text'], category=data['category'])
-    db.session.add(new_post)
-    db.session.commit()
-    return jsonify({'message': 'New post created!'})
+    current_user = User.query.filter_by(username=session.get('username')).first()
+    if current_user:
+        new_post = Post(
+            user_id=current_user.id,
+            username=current_user.username,  # Assign the username
+            text=data['text'],
+            category=data['category']
+        )
+        db.session.add(new_post)
+        db.session.commit()
+        return jsonify({'message': 'New post created!'})
+    else:
+        return jsonify({'error': 'User not found!'})
+
 
 @app.route('/likes', methods=['POST'])
 def like_post():
@@ -127,19 +138,19 @@ def process_like_batches():
     db.session.commit()
     db.session.close()
 
-@app.route('/create_post.html')
-def create_post_page():
-    return render_template('create_post.html')
-
-@app.route('/all_posts.html')
-def all_posts_page():
-    return render_template('all_posts.html')
-
 @app.route('/posts', methods=['GET'])
 def get_posts():
     posts = Post.query.all()
-    post_list = [{'id': post.id, 'user_id': post.user_id, 'text': post.text, 'created_at': post.created_at, 'likes_count': post.likes_count} for post in posts]
+    post_list = [{
+        'id': post.id,
+        'user_id': post.user_id,
+        'text': post.text,
+        'category': post.category,
+        'created_at': post.created_at.strftime('%Y-%m-%d %H:%M:%S'),  # Format the datetime
+        'likes_count': post.likes_count
+    } for post in posts]
     return jsonify(post_list)
+
 
 @app.route('/likes', methods=['GET'])
 def get_likes():
