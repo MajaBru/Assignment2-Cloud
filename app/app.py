@@ -5,6 +5,7 @@ from datetime import datetime
 import pymysql
 from flask_bcrypt import Bcrypt
 from models import db, User, Post
+from like_batcher import LikeBatcher
 import atexit
 
 app = Flask(__name__, template_folder='../front-end', static_folder='../front-end/static')
@@ -19,6 +20,7 @@ os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 
 db.init_app(app)
 bcrypt = Bcrypt(app)
+like_batcher = LikeBatcher()
 
 def create_database():
     connection = pymysql.connect(host='localhost', user='root')
@@ -141,17 +143,26 @@ def like_post():
     if request.is_json:
         data = request.json
         post_id = data.get('post_id')
-        # Check if the post exists
-        post = Post.query.get(post_id)
-        if post:
-            # Increment the likes_count of the post
-            post.likes_count += 1
-            db.session.commit()
-            return jsonify({'message': 'Post liked successfully!'})
+        likes_count = data.get('likes_count', 0)
+
+        if post_id and likes_count > 0:
+            # Check if the post exists
+            post = Post.query.get(post_id)
+            if post:
+                # Increment the likes_count of the post
+                post.likes_count += likes_count
+                db.session.commit()
+
+                return jsonify({'success': True, 'message': 'Post liked successfully!'})
+            else:
+                return jsonify({'success': False, 'message': 'Post not found!'})
         else:
-            return jsonify({'error': 'Post not found!'})
+            return jsonify({'success': False, 'message': 'Invalid data provided!'})
     else:
-        return jsonify({'error': 'Unsupported Media Type'}), 415
+        return jsonify({'success': False, 'message': 'Unsupported Media Type'}), 415
+
+
+
 
 
 @app.route('/dogs', methods=['GET', 'POST'])
