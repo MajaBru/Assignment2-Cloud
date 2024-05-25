@@ -108,7 +108,6 @@ def create_post():
     if current_user:
         new_post = Post(
             user_id=current_user.id,
-            username=current_user.username,  # Assign the username
             text=data['text'],
             category=data['category']
         )
@@ -117,6 +116,7 @@ def create_post():
         return jsonify({'message': 'New post created!'})
     else:
         return jsonify({'error': 'User not found!'})
+
 
 
 @app.route('/likes', methods=['POST'])
@@ -141,14 +141,20 @@ def process_like_batches():
 @app.route('/posts', methods=['GET'])
 def get_posts():
     posts = Post.query.all()
-    post_list = [{
-        'id': post.id,
-        'user_id': post.user_id,
-        'text': post.text,
-        'category': post.category,
-        'created_at': post.created_at.strftime('%Y-%m-%d %H:%M:%S'),  # Format the datetime
-        'likes_count': post.likes_count
-    } for post in posts]
+    post_list = []
+    for post in posts:
+        # Get the username associated with the user_id of each post
+        username = User.query.filter_by(id=post.user_id).first().username
+        post_data = {
+            'id': post.id,
+            'user_id': post.user_id,
+            'username': username,  # Add the username to the post data
+            'text': post.text,
+            'category': post.category,
+            'created_at': post.created_at.strftime('%Y-%m-%d %H:%M:%S'),  # Format the datetime
+            'likes_count': post.likes_count
+        }
+        post_list.append(post_data)
     return jsonify(post_list)
 
 

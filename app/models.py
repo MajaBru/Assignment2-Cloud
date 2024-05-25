@@ -20,17 +20,8 @@ class Post(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     likes_count = db.Column(db.Integer, default=0)
 
-    # Define a property to get the username dynamically
-    @property
-    def username(self):
-        user = User.query.get(self.user_id)
-        if user:
-            return user.username
-        else:
-            return None
-
-    def __repr__(self):
-        return f"Post('{self.text}', '{self.category}', '{self.created_at}')"
+    # Define a relationship with the User model
+    user = db.relationship('User', backref=db.backref('posts', lazy=True))
 
 
 class Like(db.Model):
