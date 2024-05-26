@@ -2,16 +2,16 @@ version: '3'
 
 services:
 
-  # SQL database
-  #db:
-   # image: mysql:5.7
-    #ports:
-     # - "32000:3306"
-    #environment:
-     # MYSQL_ROOT_PASSWORD: root
-      #MYSQL_DATABASE: redditdb
-    #volumes:
-     # - ./database:/docker-entrypoint-initdb.d/:ro
+  db:
+    container_name: sqldb
+    image: mysql:5.7
+    ports:
+      - "32000:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: fakeredditdb
+      volumes:
+      - ./database:/docker-entrypoint-initdb.d/:ro
 
   # processing layer/API Flask app
   processing:
@@ -19,14 +19,12 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile
-    #links:
-     # - db
     ports:
       - "5000:5000"
     networks:
       - app-network
-    #depends_on:
-     # - db
+    depends_on:
+        - db
 
 networks:
   app-network:

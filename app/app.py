@@ -15,7 +15,7 @@ app = Flask(__name__, template_folder='templates', static_folder='templates/stat
 
 app.secret_key = 'your_secret_key_here'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/redditdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://group4:root123@db/fakeredditdb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SESSION_FILE_DIR'] = os.path.join(app.root_path, 'sessions')
@@ -26,12 +26,6 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-def create_database():
-    connection = pymysql.connect(host='localhost', user='root')
-    cursor = connection.cursor()
-    cursor.execute("CREATE DATABASE IF NOT EXISTS redditdb")
-    cursor.close()
-    connection.close()
 
 @app.route('/')
 def index():

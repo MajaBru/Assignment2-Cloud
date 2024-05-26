@@ -1,6 +1,6 @@
-CREATE DATABASE IF NOT EXISTS redditdb;
+CREATE DATABASE IF NOT EXISTS fakeredditdb;
 
-USE redditdb;
+USE fakeredditdb;
 
 CREATE TABLE IF NOT EXISTS `user` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
