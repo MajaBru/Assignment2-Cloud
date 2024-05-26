@@ -15,7 +15,8 @@ app = Flask(__name__, template_folder='templates', static_folder='templates/stat
 
 app.secret_key = 'your_secret_key_here'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://group4:root123@localhost/fakeredditdb'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://group4:root123@localhost/fakeredditdb'
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SESSION_FILE_DIR'] = os.path.join(app.root_path, 'sessions')
