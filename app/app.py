@@ -33,7 +33,7 @@ def create_database():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return url_for('index')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
