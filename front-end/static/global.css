@@ -94,9 +94,12 @@ header nav ul {
 
 .recent-post {
     padding: 20px;
+    display: grid;
+    grid-template-columns: auto auto;
     justify-content: space-between;
-    flex-direction: column;
     border-radius: 2px;
+    column-gap: 50px;
+    border: 1px solid gray;
 }
 
 ul {
@@ -289,7 +292,7 @@ form input, form textarea{
     border-radius: 5px;
     cursor: pointer;
     border: none;
-
+    margin: 20px;
 }
 
 .like-button:hover,
