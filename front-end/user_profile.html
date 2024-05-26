@@ -7,41 +7,46 @@
     <title>{{ user.username }}'s Profile</title>
 </head>
 <body>
-
-<main>
-    <header>
-        <nav>
-            <div class="logo-container">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo">
-            </div>
-            <ul>
-                <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('user_profile', username=current_user.username) }}">My Profile</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <h1>{{ user.username }}'s Profile</h1>
-    <p>Email: {{ user.email }}</p>
-    <h2>Last 10 Posts</h2>
-    <ul>
-        {% for post in user.posts[:10] %}
-            <li>{{ post.text }} ({{ post.created_at }})</li>
-        {% endfor %}
-    </ul>
-
-    {% if is_own_profile %}
-        <form id="delete-account-form" action="{{ url_for('delete_account') }}" method="POST" onsubmit="return confirmDeletion();">
-            <button type="submit">Delete Account</button>
-        </form>
-    {% endif %}
-</main>
-
-<script>
-    function confirmDeletion() {
-        return confirm('Are you sure you want to delete your account? This action cannot be undone.');
-    }
-</script>
-</body>
-</html>
+    <main>
+        <header>
+            <nav>
+                <div class="logo-container">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo">
+                </div>
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li><a href="{{ url_for('user_profile', username=current_user.username) }}">My Profile</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+    
+        <h1>{{ user.username }}'s Profile</h1>
+        <p>Email: {{ user.email }}</p>
+        <h2>Recent posts</h2>
+        <ul>
+            {% for post in user.posts[:10] %}
+                <li>
+                    <p>{{ post.text }}</p>
+                    <p>Category: {{ post.category }}</p>
+                    <p>Posted On: {{ post.created_at }}</p>
+                    <p>Likes: {{ post.likes_count }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    
+        {% if is_own_profile %}
+            <form id="delete-account-form" action="{{ url_for('delete_account') }}" method="POST" onsubmit="return confirmDeletion();">
+                <button type="submit">Delete Account</button>
+            </form>
+        {% endif %}
+    </main>
+    
+    <script>
+        function confirmDeletion() {
+            return confirm('Are you sure you want to delete your account? This action cannot be undone.');
+        }
+    </script>
+    </body>
+    </html>
+    
