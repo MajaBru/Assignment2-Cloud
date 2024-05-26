@@ -10,7 +10,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: fakeredditdb
-      volumes:
+    volumes:
       - "./database:/docker-entrypoint-initdb.d/:ro"
 
   # processing layer/API Flask app
