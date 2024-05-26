@@ -26,7 +26,7 @@ services:
     depends_on:
         - db
     environment:
-      DB_HOST: db
+      DB_HOST: localhost
       DB_USER: group4
       DB_PASSWORD: root123
       DB_NAME: fakeredditdb
