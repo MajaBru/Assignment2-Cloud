@@ -9,7 +9,7 @@ from models import db, User, Post
 from uuid import uuid4
 import atexit
 
-app = Flask(__name__, template_folder='Assignment2-Cloud/templates', static_folder='Assignment2-Cloud/templates/static')
+app = Flask(__name__, template_folder='../templates', static_folder='../templates/static')
 
 app.secret_key = 'your_secret_key_here'
 
@@ -33,9 +33,6 @@ def create_database():
 
 @app.route('/')
 def index():
-    print("Current Working Directory:", os.getcwd())
-    print("Template Folder:", os.path.abspath(app.template_folder))
-    print("Static Folder:", os.path.abspath(app.static_folder))
     return render_template('index.html')
 
 
@@ -266,4 +263,4 @@ def create_tables():
         print('Tables created')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
