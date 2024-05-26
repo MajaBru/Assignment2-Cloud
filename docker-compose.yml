@@ -15,7 +15,7 @@ services:
 
   # processing layer/API Flask app
   processing:
-    image: flaskapplication:latest
+    container_name: flaskapp
     build:
       context: ./app
       dockerfile: Dockerfile
