@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">    
+    <script src="{{ url_for('static', filename='likepost.js') }}"></script>
+    <title>Home</title>
+</head>
+<body>
+
+    <main>
+
+        <header>
+            <nav>
+                <div class="logo-container">
+                    <img src="/static/img/logo.png" alt="logo">
+                </div>
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li><a href="{{ url_for('user_profile', username=current_user.username) }}">My Profile</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+    
+        <h1>Homepage reddit</h1>
+    
+        <h2>Welcome, <span id="username-home">{{ current_user.username }}!</span></h2>
+    
+        <h3>Subreddit Categories:</h3>
+        <ul>
+            <li><a href="/dogs">Dogs</a></li>
+            <li><a href="/cats">Cats</a></li>
+            <li><a href="/bunnies">Bunnies</a></li>
+        </ul>
+    
+        <h3>Recent posts:</h3>
+        <div id="post-feed">
+            {% if posts %}
+                {% for post, user in posts %}
+                    <div class="post">
+                        <p><a href="{{ url_for('user_profile', username=user.username) }}">{{ user.username }}</a></p>
+                        <p>{{ post.text }}</p>
+                        <p>Category: {{ post.category }}</p>
+                        <p>Posted on: {{ post.created_at }}</p>
+                        <p>Likes: <span id="likes-count-{{ post.id }}">{{ post.likes_count }}</span></p>
+                        <button class="like-button" data-post-id="{{ post.id }}">Like</button>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No posts found.</p>
+            {% endif %}
+        </div>   
+        
+    </main>
+    
+</body>
+</html>
