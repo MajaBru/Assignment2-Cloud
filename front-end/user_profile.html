@@ -23,6 +23,9 @@
     
         <h1>{{ user.username }}'s Profile</h1>
         <p>Email: {{ user.email }}</p>
+        {% if is_own_profile %}
+            <p>Account Created On: {{ user.created_at }}</p>
+        {% endif %}
         <h2>Recent posts</h2>
         <ul>
             {% for post in user.posts[:10] %}
