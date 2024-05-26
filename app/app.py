@@ -33,6 +33,9 @@ def create_database():
 
 @app.route('/')
 def index():
+    print("Current Working Directory:", os.getcwd())
+    print("Template Folder:", os.path.abspath(app.template_folder))
+    print("Static Folder:", os.path.abspath(app.static_folder))
     return render_template('index.html')
 
 @app.route('/register', methods=['GET', 'POST'])
