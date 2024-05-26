@@ -8,8 +8,7 @@ services:
     ports:
       - "32000:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: fakeredditdb
+      MYSQL_ROOT_PASSWORD: root123
     volumes:
       - "./database:/docker-entrypoint-initdb.d/:ro"
 
