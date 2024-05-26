@@ -9,7 +9,7 @@ from models import db, User, Post
 from uuid import uuid4
 import atexit
 
-app = Flask(__name__, template_folder='../templates', static_folder='../templates/static')
+app = Flask(__name__, template_folder='Assignment2-Cloud/templates', static_folder='Assignment2-Cloud/templates/static')
 
 app.secret_key = 'your_secret_key_here'
 
@@ -34,6 +34,7 @@ def create_database():
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
