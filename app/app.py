@@ -1,11 +1,12 @@
-from flask import Flask, render_template, request, redirect, session, jsonify
+from flask import Flask, render_template, request, redirect, session, jsonify, flash, url_for
 import re, os
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timezone
 import pymysql
 from flask_bcrypt import Bcrypt
+from flask_login import current_user, login_user, logout_user, login_required, LoginManager, UserMixin
 from models import db, User, Post
-from like_batcher import LikeBatcher
+from uuid import uuid4
 import atexit
 
 app = Flask(__name__, template_folder='../front-end', static_folder='../front-end/static')
@@ -20,7 +21,8 @@ os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 
 db.init_app(app)
 bcrypt = Bcrypt(app)
-like_batcher = LikeBatcher()
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
 
 def create_database():
     connection = pymysql.connect(host='localhost', user='root')
@@ -56,45 +58,54 @@ def register():
             db.session.add(new_user)
             db.session.commit()
             msg = 'You have successfully registered!'
+            login_user(new_user)  # Login the user after successful registration
 
     return render_template('register.html', msg=msg)
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    msg = ''
-    if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+    if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
 
         user = User.query.filter_by(username=username).first()
 
+        # Check if the user exists
         if user and bcrypt.check_password_hash(user.password, password):
-            session['loggedin'] = True
-            session['username'] = user.username
-            session['email'] = user.email
-            return redirect('/home')
+            login_user(user)
+            flash('Logged in successfully!', 'success')
+            return redirect(url_for('home'))
         else:
-            msg = 'Invalid username or password!'
-            return render_template('login.html', msg=msg)
+            flash('Invalid username or password!', 'error')
 
     return render_template('login.html')
 
+
+
+
 @app.route('/logout')
+@login_required
 def logout():
-    session.pop('loggedin', None)
-    session.pop('username', None)
-    session.pop('email', None)
-    return redirect('/login')
+    logout_user()
+    flash('Logged out successfully!', 'success')
+    return redirect(url_for('login'))
+
+@app.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html', user=current_user)
+
 
 @app.route('/home', methods=['GET'])
 def home():
-    if session.get('loggedin') is True:
-        username = session.get('username')
-        email = session.get('email')
-        if username and email:
-            posts = Post.query.order_by(Post.created_at.desc()).all()  # Sort posts by created_at in descending order
-            return render_template('home.html', username=session['username'], posts=posts)
-    return redirect('/login')
+    posts = db.session.query(Post, User).join(User).order_by(Post.created_at.desc()).limit(10).all()
+    return render_template('home.html', posts=posts, current_user=current_user)
+
+
 
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -103,10 +114,10 @@ def get_users():
     return jsonify(user_list)
 
 @app.route('/posts', methods=['POST'])
+@login_required  # Require login to create a post
 def create_post():
     data = request.get_json()
-    current_user = User.query.filter_by(username=session.get('username')).first()
-    if current_user:
+    if current_user.is_authenticated:  # Ensure user is authenticated
         new_post = Post(
             user_id=current_user.id,
             text=data['text'],
@@ -125,17 +136,19 @@ def get_posts():
     post_list = []
     for post in posts:
         # Get the username associated with the user_id of each post
-        username = User.query.filter_by(id=post.user_id).first().username
-        post_data = {
-            'id': post.id,
-            'user_id': post.user_id,
-            'username': username,
-            'text': post.text,
-            'category': post.category,
-            'created_at': post.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'likes_count': post.likes_count
-        }
-        post_list.append(post_data)
+        user = User.query.get(post.user_id)
+        if user:
+            username = user.username
+            post_data = {
+                'id': post.id,
+                'user_id': post.user_id,
+                'username': username,
+                'text': post.text,
+                'category': post.category,
+                'created_at': post.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'likes_count': post.likes_count
+            }
+            post_list.append(post_data)
     return jsonify(post_list)
 
 @app.route('/likes', methods=['POST'])
@@ -145,14 +158,11 @@ def like_post():
         post_id = data.get('post_id')
         likes_count = data.get('likes_count', 0)
 
-        if post_id and likes_count > 0:
-            # Check if the post exists
+        if post_id and likes_count >= 0:
             post = Post.query.get(post_id)
             if post:
-                # Increment the likes_count of the post
                 post.likes_count += likes_count
                 db.session.commit()
-
                 return jsonify({'success': True, 'message': 'Post liked successfully!'})
             else:
                 return jsonify({'success': False, 'message': 'Post not found!'})
@@ -163,55 +173,87 @@ def like_post():
 
 
 
-
-
 @app.route('/dogs', methods=['GET', 'POST'])
+@login_required
 def dogs_subreddit():
-    if 'loggedin' not in session:
-        return redirect('/login')
-    
     if request.method == 'POST':
         text = request.form['text']
-        user_id = User.query.filter_by(username=session['username']).first().id
-        new_post = Post(user_id=user_id, text=text, category='Dogs')
+        new_post = Post(user_id=current_user.id, text=text, category='Dogs')
         db.session.add(new_post)
         db.session.commit()
         return redirect('/dogs')
     
-    posts = Post.query.filter_by(category='Dogs').order_by(Post.created_at.desc()).all() 
-    return render_template('subreddit.html', category='Dogs', posts=posts, username=session['username'])
+    # Fetch both Post and User objects
+    posts = db.session.query(Post, User).join(User).filter(Post.category == 'Dogs').order_by(Post.created_at.desc()).limit(10).all()
+    return render_template('subreddit.html', category='Dogs', posts=posts, username=current_user.username)
+
+
 
 @app.route('/cats', methods=['GET', 'POST'])
+@login_required
 def cats_subreddit():
-    if 'loggedin' not in session:
-        return redirect('/login')
-    
     if request.method == 'POST':
         text = request.form['text']
-        user_id = User.query.filter_by(username=session['username']).first().id
-        new_post = Post(user_id=user_id, text=text, category='Cats')
+        new_post = Post(user_id=current_user.id, text=text, category='Cats')
         db.session.add(new_post)
         db.session.commit()
         return redirect('/cats')
     
-    posts = Post.query.filter_by(category='Cats').order_by(Post.created_at.desc()).all() 
-    return render_template('subreddit.html', category='Cats', posts=posts, username=session['username'])
+    # Fetch both Post and User objects
+    posts = db.session.query(Post, User).join(User).filter(Post.category == 'Cats').order_by(Post.created_at.desc()).limit(10).all()
+    return render_template('subreddit.html', category='Cats', posts=posts, username=current_user.username)
+
 
 @app.route('/bunnies', methods=['GET', 'POST'])
+@login_required
 def bunnies_subreddit():
-    if 'loggedin' not in session:
-        return redirect('/login')
-    
     if request.method == 'POST':
         text = request.form['text']
-        user_id = User.query.filter_by(username=session['username']).first().id
-        new_post = Post(user_id=user_id, text=text, category='Bunnies')
+        new_post = Post(user_id=current_user.id, text=text, category='Bunnies')
         db.session.add(new_post)
         db.session.commit()
         return redirect('/bunnies')
     
-    posts = Post.query.filter_by(category='Bunnies').order_by(Post.created_at.desc()).all() 
-    return render_template('subreddit.html', category='Bunnies', posts=posts, username=session['username'])
+    # Fetch both Post and User objects
+    posts = db.session.query(Post, User).join(User).filter(Post.category == 'Bunnies').order_by(Post.created_at.desc()).limit(10).all()
+    return render_template('subreddit.html', category='Bunnies', posts=posts, username=current_user.username)
+
+
+
+
+@app.route('/user/<username>')
+@login_required
+def user_profile(username):
+    user = User.query.filter_by(username=username).first()
+    if user:
+        if current_user.is_authenticated and current_user.username == username:
+            return render_template('user_profile.html', user=user, is_own_profile=True)
+        else:
+            return render_template('user_profile.html', user=user, is_own_profile=False)
+    else:
+        return render_template('user_not_found.html', username=username)
+    
+@app.route('/delete_account', methods=['POST'])
+@login_required
+def delete_account():
+    user = current_user
+    
+    # Generate unique identifier for deleted account
+    unique_identifier = str(uuid4()).replace('-', '')[:8]  # Example: 'a1b2c3d4'
+    
+    # Update username and email to unique identifier
+    user.username = f'[deleted-{unique_identifier}]'
+    user.email = f'deleted_{unique_identifier}@example.com'
+    
+    # Commit changes to the database
+    db.session.commit()
+    
+    # Log out the user
+    logout_user()
+    
+    # Redirect to index page
+    return redirect(url_for('index'))  # Redirect to the index route
+
 
 def create_tables():
     with app.app_context():

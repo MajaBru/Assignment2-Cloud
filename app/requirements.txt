@@ -4,3 +4,4 @@ flask-sqlalchemy
 pymysql
 Flask-Bcrypt
 APScheduler
+Flask-Login
