@@ -33,6 +33,9 @@ def create_database():
 
 @app.route('/')
 def index():
+    print("Current Working Directory:", os.getcwd())
+    print("Template Folder:", os.path.abspath(app.template_folder))
+    print("Static Folder:", os.path.abspath(app.static_folder))
     return render_template('index.html')
 
 
@@ -263,4 +266,4 @@ def create_tables():
         print('Tables created')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
