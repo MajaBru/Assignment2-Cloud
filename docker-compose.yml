@@ -22,7 +22,7 @@ services:
     #links:
      # - db
     ports:
-      - "5003:5000"
+      - "5000:5000"
     networks:
       - app-network
     #depends_on:
