@@ -11,7 +11,7 @@ import atexit
 
 
 
-app = Flask(__name__, template_folder='../templates', static_folder='../templates/static')
+app = Flask(__name__, template_folder='templates', static_folder='templates/static')
 
 app.secret_key = 'your_secret_key_here'
 
