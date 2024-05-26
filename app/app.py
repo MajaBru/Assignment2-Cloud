@@ -9,7 +9,15 @@ from models import db, User, Post
 from uuid import uuid4
 import atexit
 
-app = Flask(__name__, template_folder='../templates', static_folder='../templates/static')
+# Get the directory where app.py is located
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Construct paths for static and template folders relative to current directory
+static_folder = os.path.join(current_dir, 'app', 'static')
+template_folder = os.path.join(current_dir, 'app', 'templates')
+
+# Create the Flask app
+app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
 
 app.secret_key = 'your_secret_key_here'
 
