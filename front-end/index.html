@@ -8,15 +8,15 @@
 </head>
 <body>
     <header class="header">
-        <img src="./static/img/arrow.png" class="logo" alt="logo">
-    <nav class="navbar">
-        <ul>
-            <li><a href="{{ url_for('home') }}">Home</a></li>
-            <li><a href="{{ url_for('user_profile', username=current_user.username) }}">My Profile</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
-        </ul>
-    </nav>
-</header>     
+            <img src="/static/img/logo.png" class="logo" alt="logo">
+        <nav class="navbar">
+            <ul>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('user_profile', username=current_user.username) }}">My Profile</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+        </nav>
+    </header>     
     <main>
         <div class="welcome-page">
             
