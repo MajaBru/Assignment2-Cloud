@@ -9,7 +9,7 @@ from models import db, User, Post
 from uuid import uuid4
 import atexit
 
-app = Flask(__name__, template_folder='/template', static_folder='/template/static')
+app = Flask(__name__, template_folder='../template', static_folder='../template/static')
 
 app.secret_key = 'your_secret_key_here'
 
