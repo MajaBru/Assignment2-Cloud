@@ -24,6 +24,7 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
+
 def create_database():
     connection = pymysql.connect(host='localhost', user='root')
     cursor = connection.cursor()
@@ -31,9 +32,11 @@ def create_database():
     cursor.close()
     connection.close()
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -62,9 +65,11 @@ def register():
 
     return render_template('register.html', msg=msg)
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

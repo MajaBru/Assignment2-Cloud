@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">    
 </head>
 <body>
-    <h1>Register</h1>
+    <div class="login-form">
+        <div class="section-form">
+<h1>Register</h1>
     <form action="{{ url_for('register') }}" method="post">
         <div class="msg">{{ msg }}</div>
         <input id="username" name="username" type="text" placeholder="Enter a username" class="textbox" required/><br><br>
@@ -16,7 +18,11 @@
         <input type="submit" class="default-btn" value="Register"><br><br>
         <p class="bottom">Already have an account? <a class="bottom" href="{{ url_for('login') }}">Login here</a>  </p>
     </form>
+        </div>
+        
 
     </div>
+    </div>
+    
 </body>
 </html>

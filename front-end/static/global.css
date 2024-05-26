@@ -5,69 +5,323 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+p {
+    font-size: 16px;
+
+}
+
+body, h1, h2, h3, h4,
+header nav ul,
+.header,
+.navbar,
+.recent-post,
+.icon,
+form,
+.section-form,
+.login-form,
+form,
+.create-post form,
+.subreddit-list
+ {
+    display: flex;
+    
+}
+
+body {
+    color: black;
+    justify-content: center;
+}
+
 h1, h2, h3, h4 {
-    margin-top: 1em;
-    margin-bottom: 1em;
-    text-align: center;
+    margin: 20px;
+    color: #333;
+    justify-content: center;
 }
-
-main {
-    margin: 0 15em;
-}
-
 
 /* HEADER */
-
-header .logo-container {
-    width: 100%;
-    height: 100%;
-}
-
-header .logo-container img {
-    width: 150px;
-}
-
-header nav{
-    padding: 2em;
-    display: flex;
-    justify-content: space-between;
-}
 
 header nav li {
     list-style: none;
 }
+
 header nav ul {
-    display: flex;
+    list-style: none;
+    justify-content: space-between;
+    
+} 
+
+.sub-ul {
+    background-color: #242424;
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
     justify-content: space-between;
     align-items: center;
-    gap: 1em;
+    
+}
+
+.navbar {
+    align-items: center;
+}
+
+.navbar ul {
+    list-style-type: none;
+}
+
+.navbar li {
+    margin-left: 20px;
+}
+
+.navbar a {
+    /* margin-left: 20px; */
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: cyan;
+}
+
+.navbar a:hover::before {
+    width: 100%;
+}
+
+.recent-post {
+    padding: 20px;
+    justify-content: space-between;
+    flex-direction: column;
+    border-radius: 2px;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
 
 }
 
-header nav a {
+li {
+    float: left;
+}
+
+li a {
+    
+    color: black;
+    text-align: center;
+}
+
+.logo {
+    width: 150px;
+}
+
+
+.header nav a {
     text-decoration: none;
     color: white;
     font-weight: bolder;
-    padding: .4em;
+    padding: 0.4em 0.8em;
     background-color: black;
+} 
+
+.username-post{
+    font-size: 32px;
+    text-decoration: none;
+    color: #333;
+    padding: 5px 10px;
+    display: inline-block;
+    
+}
+
+.username-post:hover{
+    background-color: #e0e0e0;
+}
+
+
+
+.icon {
+    align-items: center;
+}
+
+.icon img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+/* main */
+main {
+    padding-top: 80px;
+    border-radius: 0.3em;
+}
+
+.back-to-home{
+    display: block;
+    margin-bottom: 1em;
+    color: aqua;
+}
+
+.section-form{
+width: 50px;
+height: 60px;
+    border-radius: 50px;
+  
+}
+
+/* FORM */
+form{
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;  
+}
+
+.section-form {
+    flex-direction: column;
+    height: 80%;
+    width: 50em;
+    box-shadow: 0 0 6px rgb(119, 117, 117);
+}
+
+.login-form {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.msg {
+    color: red;
+    margin-bottom: 1em;
+}
+
+/* form */
+form {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+form input {
+    padding: 0.5em;
+    border-radius: 1px solid #333;
+    min-width: 200px;
+    margin-bottom: 1em;
+}
+
+
+form input, form textarea{
+    padding: 1em;
+    border: 1px solid #333;
     border-radius: .3em;
+    width: 60%;
+    margin-bottom: 1em;
 }
 
-header nav a:hover {
-    background-color: #333;
+/* post */
+.create-post form {
+    flex-direction: column;
 }
 
-/* button style */
+.post {
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 0.3em;
+    width: 50em;
+    padding: 1em;
+    margin-bottom: 20px;
+}
+
+.post a {
+    color: rgb(0, 0, 0);
+}
+
+/* sub */
+.subreddit-list {
+    list-style-type: none;
+    justify-content: center;
+}
+
+.subreddit-list li {
+    gap: 1em;
+    margin-top: 1em;
+  margin-bottom: 10px;
+}
+
+.subreddit-list li a {
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: black;
+    color: white;
+    text-decoration: none;
+    margin: 20px;
+}
+
+.subreddit-list a:hover {
+    background-color: #498084;
+
+}
+
+/* post */
+.post p {
+    margin-bottom: 10px;
+}
+
+.post a {
+    color: blue;
+}
+
+.post a:hover {
+    text-decoration: underline;
+}
+
+/* button */
+
+.like-button, .post-btn {
+    padding: 5px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: rgb(255, 0, 0);
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+
+}
+
+.like-button:hover,
+.post-btn:hover {
+    background-color: rgb(137, 13, 13);
+}
+
+
+.bottom, .post-btn {
+
+    text-align: center;
+    margin-top: 30px;
+}
+
+
+.bottom a {
+    color: rgb(55, 162, 229);
+}
+
+.bottom a:hover {
+    color: rgb(112, 163, 163);
+}
+
 
 .default-btn {
     padding: .5em 1em;
-    background-color: #242424;
+    background-color: red;
     color: white;
     border: none;
-    border-radius: .3em;
+    border-radius: 4em;
     cursor: pointer;
-    opacity: .8;
-    transition: .5s ease;
+    opacity: 0.8;
+    width: 30px;
 }   
 
 .default-btn:hover {
@@ -75,40 +329,47 @@ header nav a:hover {
     opacity: 1;
 }
 
-/* FORM */
 
-form {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 2em;
-    width: 100%;
+/* profile */
+.profile-post {
+
+   padding: 20px;
+   margin-top: 20px;
+
 }
 
-form input {
-    padding: .5em;
-    border: 1px solid #333;
-    border-radius: .3em;
-    min-width: 200px;
-    width: 20vw;
+.profile-details {
+    margin-bottom: 20px;
+    
+}
+
+.profile-post h1 {
+    text-align: center;
+ }
+
+.profile-post ul {
+   
+    list-style-type: none;
+}
+
+.profile-post li {
+    margin-bottom: 20px;
 }
 
 
-
-
-
-
-
-/* FOOTER */
-
-
+.contianer {
+    margin: 23px;
+}
 
 
 /* HOME */
-
 #username-home {
     color: rgb(10, 127, 148);
+    font-style: italic;
+}
+
+#username-home {
+    color: red;
     font-style: italic;
 }
 
@@ -117,5 +378,9 @@ form input {
     main {
         margin: 0 5em;
     }
+
+    .container {
+        margin-top: 10px;
+    }
     
-}
+} 
