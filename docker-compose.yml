@@ -1,6 +1,18 @@
 version: '3'
 
 services:
+
+  # SQL database
+  db:
+    image: mysql:5.7
+    ports:
+      - "32000:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: redditdb
+    volumes:
+      - ./database:/docker-entrypoint-initdb.d/:ro
+
   # processing layer/API Flask app
   processing:
     image: flaskapplication:latest
@@ -11,19 +23,3 @@ services:
       - "5000:5000"
     depends_on:
       - db
-
-  # SQL database
-  db:
-    image: mysql:latest
-    restart: always
-    ports:
-      - "32000:3306"
-    environment:
-      MYSQL_USER: "group4"
-      MYSQL_PASSWORD: "root123"
-      MYSQL_DATABASE: "redditdb"
-    volumes:
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./data:/var/lib/mysql
-
-

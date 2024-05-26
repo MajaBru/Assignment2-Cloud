@@ -139,6 +139,7 @@ def get_posts():
         user = User.query.get(post.user_id)
         if user:
             username = user.username
+            
             post_data = {
                 'id': post.id,
                 'user_id': post.user_id,
@@ -261,6 +262,4 @@ def create_tables():
         print('Tables created')
 
 if __name__ == '__main__':
-    create_database()
-    create_tables()
     app.run(debug=True, port=5000)

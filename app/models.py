@@ -12,8 +12,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
-
+    created_at = db.Column(db.DateTime, default=datetime.now())
     posts = db.relationship('Post', backref='author', lazy=True)
 
     def __repr__(self):
@@ -27,8 +26,8 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     text = db.Column(db.String(255), nullable=False)
     category = db.Column(db.String(50), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    likes_count = db.Column(db.Integer, default=0)  # New column to store like count
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    likes_count = db.Column(db.Integer, default=0) 
 
     # Define the relationship with the User model
     user = db.relationship('User', backref='posted_by')
