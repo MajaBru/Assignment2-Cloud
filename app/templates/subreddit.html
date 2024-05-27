@@ -8,19 +8,22 @@
     <title>{{ category }} Subreddit</title>
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo-container">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo">
-            </div>
-            <ul>
-                <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
+    <header class="header">
+        <img src="/static/img/logo.png" class="logo" alt="logo">
+    <nav class="navbar">
+        <ul>
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('user_profile', username=current_user.username) }}">My Profile</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+</header>
     <main>
+        <div class="icon">
+             <img src="/front-end/static/img/arrow.png" alt="">
         <a href="{{ url_for('home') }}">Go to Homepage</a>
+        </div>
+       
         <h1>{{ category }} Subreddit</h1>
         <h2>Welcome, {{ username }}!</h2>
 
@@ -28,11 +31,11 @@
             <h2>Create a Post</h2>
             <form method="POST">
                 <textarea name="text" placeholder="Write your post here..." required></textarea>
-                <button type="submit">Post</button>
+                <button type="submit" class="post-btn">Post</button>
             </form>
         </section>
 
-        <section>
+        <section class="section">
             <h2>Recent posts:</h2>
             <div id="post-feed">
                 {% if posts %}
