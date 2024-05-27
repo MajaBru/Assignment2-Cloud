@@ -12,7 +12,8 @@ services:
       MYSQL_DATABASE: fakeredditdb
     volumes:
       - mysql-data:/var/lib/mysql
-    network_mode: "host"
+    networks:
+      - app-network
 
   # processing layer/API Flask app
   processing:
