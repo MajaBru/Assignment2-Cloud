@@ -4,7 +4,6 @@ services:
 
   db:
     container_name: sqldb
-    image: mysql:latest
     ports:
       - "32000:3306"
     environment:
@@ -13,8 +12,8 @@ services:
       MYSQL_USER: group4
       MYSQL_PASSWORD: root123
     volumes:
-      - /var/lib/mysql:/var/lib/mysql
-      - ./database:/docker-entrypoint-initdb.d/:ro
+      - db_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-inistdb.d/:ro
     networks:
       - app-network
 
