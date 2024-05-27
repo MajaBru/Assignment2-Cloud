@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `user` (
     `username` VARCHAR(50) UNIQUE NOT NULL,
     `email` VARCHAR(100) UNIQUE NOT NULL,
     `password` VARCHAR(100) NOT NULL,
-    `created_at` DATETIME
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `post` (
     `user_id` INT NOT NULL,
     `text` VARCHAR(255) NOT NULL,
     `category` VARCHAR(50) NOT NULL,
-    `created_at` DATETIME,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `likes_count` INT DEFAULT 0,
     FOREIGN KEY (`user_id`) REFERENCES `user`(`id`)
 );

@@ -14,7 +14,9 @@ app = Flask(__name__, template_folder='templates', static_folder='templates/stat
 
 app.secret_key = 'your_secret_key_here'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/fakeredditdb'
+
+# if you want to test connect, feel free to modify the connection to use the database 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/fakeredditdb'
 
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
