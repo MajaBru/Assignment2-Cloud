@@ -4,11 +4,12 @@ services:
 
   db:
     container_name: sqldb
-    image: mysql:5.7
+    image: mysql:latest
     ports:
       - "32000:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: fakeredditdb
     volumes:
       - "./database:/docker-entrypoint-initdb.d/:ro"
 
