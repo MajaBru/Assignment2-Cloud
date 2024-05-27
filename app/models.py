@@ -27,7 +27,7 @@ class Post(db.Model):
     text = db.Column(db.String(255), nullable=False)
     category = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now())
-    likes_count = db.Column(db.Integer, default=0) 
+    likes_count = db.Column(db.Integer, default=0)
 
     # Define the relationship with the User model
     user = db.relationship('User', backref='posted_by')

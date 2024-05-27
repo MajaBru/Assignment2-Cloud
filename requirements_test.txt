@@ -1,0 +1,3 @@
+Pytest
+Flake8
+Mypy
