@@ -3,14 +3,15 @@ version: '3'
 services:
 
   db:
-    image: mysql:5.7
     container_name: sqldb
+    image: mariadb:10.5
     ports:
       - "32000:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: fakeredditdb
     volumes:
-      - ./database:/docker-entrypoint-initdb.d/:ro
+      - mysql-data:/var/lib/mysql
     networks:
       - app-network
 
