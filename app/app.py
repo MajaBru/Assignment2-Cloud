@@ -9,13 +9,14 @@ from models import db, User, Post
 from uuid import uuid4
 import atexit
 
+
 app = Flask(__name__, template_folder='templates', static_folder='templates/static')
 
 app.secret_key = 'your_secret_key_here'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/fakeredditdb'
 
-#app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
+# app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SESSION_FILE_DIR'] = os.path.join(app.root_path, 'sessions')
@@ -82,8 +83,6 @@ def login():
     return render_template('login.html')
 
 
-
-
 @app.route('/logout')
 @login_required
 def logout():
@@ -101,7 +100,6 @@ def profile():
 def home():
     posts = db.session.query(Post, User).join(User).order_by(Post.created_at.desc()).limit(10).all()
     return render_template('home.html', posts=posts, current_user=current_user)
-
 
 
 @app.route('/users', methods=['GET'])
@@ -136,7 +134,6 @@ def get_posts():
         user = User.query.get(post.user_id)
         if user:
             username = user.username
-            
             post_data = {
                 'id': post.id,
                 'user_id': post.user_id,
@@ -170,7 +167,6 @@ def like_post():
         return jsonify({'success': False, 'message': 'Unsupported Media Type'}), 415
 
 
-
 @app.route('/dogs', methods=['GET', 'POST'])
 @login_required
 def dogs_subreddit():
@@ -180,11 +176,9 @@ def dogs_subreddit():
         db.session.add(new_post)
         db.session.commit()
         return redirect('/dogs')
-    
     # Fetch both Post and User objects
     posts = db.session.query(Post, User).join(User).filter(Post.category == 'Dogs').order_by(Post.created_at.desc()).limit(10).all()
     return render_template('subreddit.html', category='Dogs', posts=posts, username=current_user.username)
-
 
 
 @app.route('/cats', methods=['GET', 'POST'])
@@ -196,7 +190,6 @@ def cats_subreddit():
         db.session.add(new_post)
         db.session.commit()
         return redirect('/cats')
-    
     # Fetch both Post and User objects
     posts = db.session.query(Post, User).join(User).filter(Post.category == 'Cats').order_by(Post.created_at.desc()).limit(10).all()
     return render_template('subreddit.html', category='Cats', posts=posts, username=current_user.username)
@@ -211,12 +204,10 @@ def bunnies_subreddit():
         db.session.add(new_post)
         db.session.commit()
         return redirect('/bunnies')
-    
+
     # Fetch both Post and User objects
     posts = db.session.query(Post, User).join(User).filter(Post.category == 'Bunnies').order_by(Post.created_at.desc()).limit(10).all()
     return render_template('subreddit.html', category='Bunnies', posts=posts, username=current_user.username)
-
-
 
 
 @app.route('/user/<username>')
@@ -230,25 +221,25 @@ def user_profile(username):
             return render_template('user_profile.html', user=user, is_own_profile=False)
     else:
         return render_template('user_not_found.html', username=username)
-    
+
 @app.route('/delete_account', methods=['POST'])
 @login_required
 def delete_account():
     user = current_user
-    
+
     # Generate unique identifier for deleted account
     unique_identifier = str(uuid4()).replace('-', '')[:8]  # Example: 'a1b2c3d4'
-    
+
     # Update username and email to unique identifier
     user.username = f'[deleted-{unique_identifier}]'
     user.email = f'deleted_{unique_identifier}@example.com'
-    
+
     # Commit changes to the database
     db.session.commit()
-    
+
     # Log out the user
     logout_user()
-    
+
     # Redirect to index page
     return redirect(url_for('index'))  # Redirect to the index route
 
@@ -258,5 +249,7 @@ def create_tables():
         db.create_all()
         print('Tables created')
 
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+
