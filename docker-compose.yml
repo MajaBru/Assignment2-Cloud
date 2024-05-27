@@ -31,3 +31,5 @@ services:
 networks:
   app-network:
     driver: bridge
+volumes:
+  mysql-data:
