@@ -7,7 +7,7 @@ from app.models import db
 def app():
     flask_app.config.update({
         "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": 'mysql+pymysql://group4:root123@db/redditdb',
+        "SQLALCHEMY_DATABASE_URI": 'mysql+pymysql://root@db/fakeredditdb',
     })
     return flask_app
 
