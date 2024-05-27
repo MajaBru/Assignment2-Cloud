@@ -3,7 +3,8 @@ This project is a simple-ish website inspired by Reddit-like forum sites. Buildi
 
 ## How to setup locally
 Without dockerizing the application, you can setup the application locally:
-
+- Clone the repo
+- in terminal run "pip install -r requirements.txt"
 - Add your connection to your local SQL server f.ex: "root@localhost/fakeredditdb" or "root:root@localhost/fakeredditdb" if you have a password.
 Found on this line in app.py: "app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/fakeredditdb'"
 
