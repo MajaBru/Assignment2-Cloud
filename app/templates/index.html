@@ -7,17 +7,16 @@
     <title>Reddit</title>
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo-container">
-                <img src="/static/img/logo.png" alt="logo">
-            </div>
+    <header class="header">
+            <img src="/static/img/logo.png" class="logo" alt="logo">
+        <nav class="navbar">
             <ul>
-                <li><a href="/login">Login</a></li>
-                <li><a href="/register">Register</a></li>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('user_profile', username=current_user.username) }}">My Profile</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
             </ul>
         </nav>
-    </header>
+    </header>     
     <main>
         <div class="welcome-page">
             
